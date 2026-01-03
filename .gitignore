@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# production build
+dist/
+
+# optional: Vite specific
+.vite/
+
+# system / editor stuff (optional but recommended)
+.DS_Store
+.env
+.idea/
+.vscode/
