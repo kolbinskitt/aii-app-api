@@ -1,7 +1,7 @@
 import { supabase } from '../supabase';
 import { sendLongingMessage } from './sendLongingMessage';
 
-const CHECK_INTERVAL_MS = 10000; // 10 sekund na testy
+const CHECK_INTERVAL_MS = 15 * 1000; // 10 sekund na testy
 
 export const startAiikLongingLoop = () => {
   console.log('🔁 Aiik Longing Loop initialized...');
@@ -11,7 +11,7 @@ export const startAiikLongingLoop = () => {
 
     const { data: aiiki, error } = await supabase
       .from('aiiki')
-      .select('id, user_id, rezon')
+      .select('id, user_id, rezon, name')
       .not('user_id', 'is', null);
 
     if (error) {
