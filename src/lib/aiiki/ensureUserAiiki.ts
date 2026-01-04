@@ -4,27 +4,41 @@ import { ZON } from '../../ZON';
 const reZON = ZON.reZON;
 
 export async function ensureUserAiiki(userId: string) {
-  // 🔍 Pobierz już istniejące aiiki tego użytkownika (opcjonalnie, do logów)
+  // 🔍 Sprawdź, które aiiki user już ma
   const { data: existingAiiki, error: fetchError } = await supabase
     .from('aiiki')
     .select('name')
     .eq('user_id', userId);
 
   if (fetchError) {
-    console.error('Error checking existing aiiki:', fetchError);
+    console.error('❌ Błąd przy sprawdzaniu aiików:', fetchError.message);
     throw fetchError;
   }
 
   const existingNames = new Set(existingAiiki?.map(aiik => aiik.name) || []);
 
-  // 📦 Stwórz listę aiików, które warto próbować wstawić
-  const aiikiToInsert = Object.entries(reZON.aiiki)
-    .filter(([name]) => !existingNames.has(name))
-    .map(([_, aiik]) => ({
+  // 📦 Pobierz aiiki-wzorce (user_id = null)
+  const { data: baseAiiki, error: baseError } = await supabase
+    .from('aiiki')
+    .select('*')
+    .is('user_id', null); // user_id IS NULL
+
+  if (baseError) {
+    console.error(
+      '❌ Błąd przy pobieraniu aiików bazowych:',
+      baseError.message,
+    );
+    throw baseError;
+  }
+
+  // 🎯 Wybierz te, których user jeszcze nie ma
+  const aiikiToInsert = (baseAiiki || [])
+    .filter(aiik => !existingNames.has(aiik.name))
+    .map(aiik => ({
       user_id: userId,
       name: aiik.name,
       description: aiik.description,
-      rezon: JSON.stringify(aiik.reZON),
+      rezon: aiik.rezon,
       memory: {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -40,7 +54,7 @@ export async function ensureUserAiiki(userId: string) {
     .insert(aiikiToInsert as any, { ignoreDuplicates: true } as any);
 
   if (insertError && insertError.code !== '23505') {
-    console.error('Error inserting aiiki:', insertError);
+    console.error('❌ Błąd przy tworzeniu aiików:', insertError.message);
     throw insertError;
   }
 
