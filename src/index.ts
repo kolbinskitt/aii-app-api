@@ -4,6 +4,7 @@ import cors from 'cors';
 import generateRoute from './routes/generate';
 import authRoutes from './routes/auth.js';
 import gptProxy from './routes/gpt-proxy';
+import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 
 dotenv.config();
 
@@ -24,3 +25,5 @@ app.listen(PORT, () => {
 app.get('/', (req, res) => {
   res.send('✨ aiiK API is alive ✨');
 });
+
+startAiikLongingLoop();
