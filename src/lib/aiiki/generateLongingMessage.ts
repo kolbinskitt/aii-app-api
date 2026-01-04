@@ -38,8 +38,6 @@ humZON: ${JSON.stringify(humZON)}
 Wygeneruj tylko wiadomość. Bez żadnego podpisu.
 `;
 
-  console.log(systemPrompt);
-
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',

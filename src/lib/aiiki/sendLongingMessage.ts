@@ -117,7 +117,7 @@ Nie cytuj. Nie oceniaj.
   }
 
   if (summary) {
-    const updatedContext = [...context, `Aiik: ${summary}`];
+    const updatedContext = [...context, `Aiik ${aiik.name}: ${summary}`];
 
     const { error: contextError } = await supabase
       .from('rooms')
