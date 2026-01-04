@@ -15,7 +15,7 @@ router.post('/generate', async (req, res) => {
 
   const model = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
   const fullPrompt = `${name}\n${description}\n${persona}\nUser: ${prompt}`;
-  console.log(fullPrompt);
+
   try {
     if (stream) {
       const completion = await openai.chat.completions.create({
