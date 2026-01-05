@@ -2,14 +2,15 @@ import express from 'express';
 import { OpenAI } from 'openai';
 import { supabase } from '../lib/supabase';
 import getUserUUIDFromAuth from '../helpers/getUserUUIDFromAuth';
-
-const CREDITS_USED = 0.001;
+import getCreditCost from '../helpers/getCreditCost';
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/gpt-proxy', async (req, res) => {
-  const { model = 'gpt-4', temperature = 0.7, messages = [] } = req.body;
+  const model = process.env.OPENAI_MODEL || '';
+  const { temperature = 0.6, messages = [] } = req.body;
+  const creditsUsed = getCreditCost(model);
   const user_id = await getUserUUIDFromAuth(req);
 
   if (!user_id) {
@@ -31,7 +32,7 @@ router.post('/gpt-proxy', async (req, res) => {
 
     const { error: insertError } = await supabase.from('credits_usage').insert({
       user_id,
-      credits_used: CREDITS_USED,
+      credits_used: creditsUsed,
     });
 
     if (insertError) {
