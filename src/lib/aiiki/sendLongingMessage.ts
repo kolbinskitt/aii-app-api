@@ -1,7 +1,7 @@
 import { supabase } from '../supabase';
 import { generateLongingMessage } from './generateLongingMessage';
 import OpenAI from 'openai';
-import getCreditCost from '../../helpers/getCreditCost';
+import getCreditCost from '../../utils/getCreditCost';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

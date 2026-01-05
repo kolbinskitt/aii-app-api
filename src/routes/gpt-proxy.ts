@@ -1,8 +1,8 @@
 import express from 'express';
 import { OpenAI } from 'openai';
 import { supabase } from '../lib/supabase';
-import getUserUUIDFromAuth from '../helpers/getUserUUIDFromAuth';
-import getCreditCost from '../helpers/getCreditCost';
+import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
+import getCreditCost from '../utils/getCreditCost';
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
