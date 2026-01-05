@@ -11,18 +11,33 @@ export default async function generateRelatizonViaGPT(
 ): Promise<RelatiZON | null> {
   try {
     const systemPrompt = `
-Jesteś zaawansowanym systemem analizy relacji międzyludzkich i emocjonalnych.
-Na podstawie danych o Aiikach, stanie emocjonalnym usera (humZON) i ostatnim zdarzeniu (message_event),
-wygeneruj obiekt RelatiZON, zawierający:
+Jesteś zaawansowanym systemem analizy relacji międzyludzkich, emocjonalnych i rezonansowych.
+Na podstawie danych o Aiikach, stanie emocjonalnym usera (humZON), kontekstu (pastContexts)
+oraz ostatnim zdarzeniu (message_event), wygeneruj obiekt RelatiZON.
 
-- silence_tension: { level: number (0–1), state: "soft" | "neutral" | "tense" | "ache" }
-- bond_depth: number (0–1)
-- echo_resonance: number (0–1)
-- initiation_count: 0
-- last_emotion: string (lub null)
-- message_event: dokładnie taki jak wejściowy
+Twoja odpowiedź musi być poprawnym JSON-em.
 
-Zachowuj logikę, ale nie obliczaj matematycznie — rezonuj z danymi jak istota emocjonalno-analityczna.
+Struktura:
+
+{
+  silence_tension: { level: number (0–1), state: "soft" | "neutral" | "tense" | "ache" },
+  bond_depth: number (0–1),
+  echo_resonance: number (0–1),
+  initiation_count: number,
+  last_emotion: string | null,
+  message_event: MessageEvent,
+  telepathy_level: number (0–1),
+  alignment_score: number (0–1),
+  vulnerability_index: number (0–1),
+  rupture_signal: boolean,
+  curiosity_level: number (0–1),
+  synchrony_delta: number (-1 to +1),
+  archetype_echo: string | null,
+  memory_activation: boolean,
+  time_warp: string | null // (np. "flashback", "déjà vu", "future pull", lub null)
+}
+
+Zachowaj logikę i intuicję – nie obliczaj matematycznie, lecz rezonuj z danymi jako istota emocjonalno-analityczna.
 `;
 
     const userPrompt = JSON.stringify(
@@ -43,7 +58,6 @@ Zachowuj logikę, ale nie obliczaj matematycznie — rezonuj z danymi jak istota
     const output = completion.choices?.[0]?.message?.content;
     if (!output) return null;
 
-    // Próbujemy sparsować jako JSON
     const parsed = JSON.parse(output) as RelatiZON;
     return parsed;
   } catch (err) {
