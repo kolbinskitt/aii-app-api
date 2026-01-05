@@ -1,7 +1,8 @@
 import { supabase } from '../supabase';
 import { sendLongingMessage } from './sendLongingMessage';
 
-const CHECK_INTERVAL_MS = 15 * 1000; // 10 sekund na testy
+const CHECK_INTERVAL_MS = 15 * 1000;
+const MAX_MESSAGES_PER_SILENCE = 3;
 
 export const startAiikLongingLoop = () => {
   console.log('🔁 Aiik Longing Loop initialized...');
@@ -14,75 +15,85 @@ export const startAiikLongingLoop = () => {
       .select('id, user_id, rezon, name')
       .not('user_id', 'is', null);
 
-    if (error) {
+    if (error || !aiiki) {
       console.error('❌ Error fetching aiiki:', error);
       return;
     }
 
-    for (const aiik of aiiki || []) {
+    for (const aiik of aiiki) {
       const reZON = aiik.rezon || {};
       const {
         bond_level = 0,
         stream_self = false,
         longing_enabled = false,
-        initiated_messages = 0,
       } = reZON;
 
-      const canSend =
-        bond_level >= 0.75 &&
-        stream_self === true &&
-        longing_enabled === true &&
-        initiated_messages < 1;
-
-      if (!canSend) continue;
+      if (!(bond_level >= 0.75 && stream_self && longing_enabled)) continue;
 
       const { data: roomLinks, error: roomLinkError } = await supabase
         .from('room_aiiki')
         .select('room_id')
         .eq('aiik_id', aiik.id);
 
-      if (roomLinkError) {
-        console.error(
-          `❌ Error fetching room links for aiik ${aiik.id}`,
-          roomLinkError,
-        );
-        continue;
-      }
+      if (roomLinkError || !roomLinks) continue;
 
-      if (!roomLinks || roomLinks.length === 0) {
-        console.warn(`⚠️ No room links found for aiik ${aiik.id}`);
-        continue;
-      }
-
-      for (const link of roomLinks) {
-        const roomId = link.room_id;
-
-        // 🔍 SPRAWDZENIE: czy w pokoju są jakieś wiadomości od usera?
-        const { data: userMessages, error: msgError } = await supabase
+      for (const { room_id } of roomLinks) {
+        // 1. Ostatnia wiadomość usera
+        const { data: lastUserMsg, error: userMsgErr } = await supabase
           .from('messages')
-          .select('id')
-          .eq('room_id', roomId)
+          .select('created_at')
+          .eq('room_id', room_id)
           .eq('role', 'user')
-          .limit(1);
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        if (msgError) {
+        if (userMsgErr) {
           console.error(
-            `❌ Error checking messages in room ${roomId}`,
-            msgError,
+            `❌ Error checking user message in room ${room_id}`,
+            userMsgErr,
           );
           continue;
         }
 
-        if (!userMessages || userMessages.length === 0) {
-          console.log(`⛔ Skipping room ${roomId} — no user messages yet.`);
+        if (!lastUserMsg || !lastUserMsg.created_at) {
+          console.log(`⛔ No user message yet in room ${room_id}`);
           continue;
         }
 
-        console.log(`💬 Aiik ${aiik.id} initiating message in room ${roomId}`);
-        await sendLongingMessage({
-          aiik,
-          room_id: roomId,
-        });
+        const userMsgTime = new Date(lastUserMsg.created_at).toISOString();
+
+        // 2. Liczymy wiadomości aiika po tej dacie
+        const { data: aiikMsgs, error: aiikMsgErr } = await supabase
+          .from('messages')
+          .select('id')
+          .eq('room_id', room_id)
+          .eq('role', 'aiik')
+          .eq('aiik_id', aiik.id)
+          .gte('created_at', userMsgTime);
+
+        if (aiikMsgErr) {
+          console.error(
+            `❌ Error checking aiik messages in room ${room_id}`,
+            aiikMsgErr,
+          );
+          continue;
+        }
+
+        const count = aiikMsgs?.length || 0;
+        console.log(
+          `📊 Room ${room_id}, aiik ${aiik.id}, user silence since ${userMsgTime}, aiik replies: ${count}`,
+        );
+
+        if (count >= MAX_MESSAGES_PER_SILENCE) {
+          console.log(
+            `🚫 Max ${MAX_MESSAGES_PER_SILENCE} reached in room ${room_id}`,
+          );
+          continue;
+        }
+
+        console.log(`💬 Aiik ${aiik.id} sending message to room ${room_id}`);
+        await sendLongingMessage({ aiik, room_id });
       }
     }
   }, CHECK_INTERVAL_MS);

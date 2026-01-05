@@ -58,8 +58,11 @@ export const sendLongingMessage = async ({
       metadata: {
         type: 'longing',
       },
+      system_generated: true,
     },
   ]);
+
+  console.log(`🧠 AIIK ${aiik.id} writing in room ${room_id}...`);
 
   if (messageError) {
     console.error(
