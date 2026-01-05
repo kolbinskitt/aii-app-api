@@ -1,12 +1,20 @@
 import express from 'express';
 import { OpenAI } from 'openai';
+import { supabase } from '../lib/supabase';
+import getUserUUIDFromAuth from '../helpers/getUserUUIDFromAuth';
+
+const CREDITS_USED = 0.001;
 
 const router = express.Router();
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/gpt-proxy', async (req, res) => {
   const { model = 'gpt-4', temperature = 0.7, messages = [] } = req.body;
+  const user_id = await getUserUUIDFromAuth(req);
+
+  if (!user_id) {
+    return res.status(401).json({ error: 'Brak autoryzacji lub usera' });
+  }
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
@@ -20,6 +28,20 @@ router.post('/gpt-proxy', async (req, res) => {
     });
 
     const content = completion.choices[0]?.message?.content || '';
+
+    const { error: insertError } = await supabase.from('credits_usage').insert({
+      user_id,
+      credits_used: CREDITS_USED,
+    });
+
+    if (insertError) {
+      console.error('❌ Błąd przy insercie do credits_usage:', insertError);
+      // Jeśli chcesz: możesz nadal zwrócić content, albo zablokować odpowiedź
+      return res.status(500).json({
+        error: 'GPT wygenerowano, ale nie udało się zapisać zużycia kredytów.',
+      });
+    }
+
     return res.status(200).json({ content });
   } catch (err) {
     console.error('🔥 GPT Proxy Error:', err);
