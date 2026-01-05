@@ -2,6 +2,7 @@ import { supabase } from '../supabase';
 import { generateLongingMessage } from './generateLongingMessage';
 import OpenAI from 'openai';
 import getCreditCost from '../../utils/getCreditCost';
+import generateRelatizon from '../../utils/generateRelatizon';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -160,5 +161,59 @@ Nie cytuj. Nie oceniaj.`,
     console.warn(
       '⚠️ No summary was created, skipping context and credit update',
     );
+  }
+
+  // 🔁 8. Dodaj relatizon do room_aiiki_relatizon
+
+  const { data: roomAiikiLinks } = await supabase
+    .from('room_aiiki')
+    .select('id, aiik_id')
+    .eq('room_id', room_id);
+
+  if (!roomAiikiLinks) {
+    console.error(`❌ Failed to fetch aiiki links for room ${room_id}`);
+    return;
+  }
+
+  const { data: allAiikiInRoom } = await supabase
+    .from('aiiki')
+    .select('id, name, rezon, description')
+    .in(
+      'id',
+      roomAiikiLinks.map(link => link.aiik_id),
+    );
+
+  if (!allAiikiInRoom) {
+    console.error(`❌ Failed to fetch aiiki data for room ${room_id}`);
+    return;
+  }
+
+  const messageEvent = {
+    from: 'aiik' as const,
+    summary: summary || `Aiik ${aiik.name} wysłał wiadomość tęsknoty`,
+    signal: 'aiik_longing' as const,
+  };
+
+  const relatizon = generateRelatizon(allAiikiInRoom, humZON, [], messageEvent);
+
+  for (const link of roomAiikiLinks) {
+    const { data: relatizonRow, error: insertError } = await supabase
+      .from('room_aiiki_relatizon')
+      .insert([
+        {
+          room_aiiki_id: link.id,
+          relatizon,
+        },
+      ])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error(
+        `❌ Failed to insert relatizon for aiik ${link.aiik_id}`,
+        insertError,
+      );
+      continue;
+    }
   }
 };

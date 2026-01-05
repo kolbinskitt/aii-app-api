@@ -1,6 +1,6 @@
 import { Aiik, HumZON, MessageEvent, RelatiZON } from '../types';
 
-export default function asyncgenerateRelatizon(
+export default function generateRelatizon(
   aiiki: Aiik[],
   userHumzon: HumZON,
   pastContexts: string[] = [],

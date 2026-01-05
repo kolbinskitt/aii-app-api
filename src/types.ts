@@ -73,6 +73,7 @@ export type RelatiZONSignal =
   | 'message' // zwykła wiadomość w pokoju
   | 'room_created' // początkowe powołanie pokoju
   | 'aiik_invoked' // aiik został wybrany / wezwany
+  | 'aiik_longing' // tęsknota aiika
   | 'user_mood' // user dodał swój humZON / nastrój
   | 'loop_awareness' // powtarzający się wzorzec został wykryty
   | 'breakthrough' // istotna zmiana stanu relacji
