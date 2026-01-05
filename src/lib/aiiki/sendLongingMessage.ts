@@ -18,13 +18,13 @@ export const sendLongingMessage = async ({
   // 🧠 1. Pobierz najnowszy humZON usera
   const { data: humzonData } = await supabase
     .from('user_humzon')
-    .select('hum_zon')
+    .select('humzon')
     .eq('user_id', aiik.user_id)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
 
-  const humZON = humzonData?.hum_zon || {};
+  const humZON = humzonData?.humzon || {};
 
   // 🧠 2. Pobierz meta z rooma
   const { data: roomData, error: roomError } = await supabase
