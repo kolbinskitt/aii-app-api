@@ -32,7 +32,7 @@ export const startAiikLongingLoop = () => {
         bond_level >= 0.75 &&
         stream_self === true &&
         longing_enabled === true &&
-        initiated_messages < 3;
+        initiated_messages < 1;
 
       if (!canSend) continue;
 

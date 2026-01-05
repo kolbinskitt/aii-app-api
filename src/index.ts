@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import generateRoute from './routes/generate';
 import authRoutes from './routes/auth.js';
 import gptProxy from './routes/gpt-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
@@ -15,7 +14,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/auth', authRoutes);
-app.post('/generate', generateRoute);
 app.post('/gpt-proxy', gptProxy);
 
 app.listen(PORT, () => {
