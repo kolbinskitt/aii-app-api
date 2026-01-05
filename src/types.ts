@@ -88,12 +88,24 @@ export type MessageEvent = {
 
 export type RelatiZON = {
   silence_tension: {
-    level: number;
-    state: string;
+    level: number; // 0–1
+    state: 'soft' | 'neutral' | 'tense' | 'ache';
   };
-  bond_depth: number;
-  echo_resonance: number;
-  initiation_count: number;
+  bond_depth: number; // 0–1 — uśrednione z trust_level
+  echo_resonance: number; // 0–1 — pojawianie się imion/tematów
+  initiation_count: number; // ile razy aiik inicjował kontakt
   last_emotion: string | null;
+
   message_event: MessageEvent;
+
+  // 🌌 Nowe pola:
+  telepathy_level: number; // 0–1 — czy wypowiedź odpowiadała myślom niewypowiedzianym
+  alignment_score: number; // 0–1 — zgodność energii usera i aiików (na bazie humzon vs rezon)
+  vulnerability_index: number; // 0–1 — jak bardzo user/aiik się otworzył
+  rupture_signal: boolean; // czy pojawił się mikropęknięcie (przerwanie narracji, zmiana tonu)
+  curiosity_level: number; // 0–1 — czy wiadomość zwiększyła zaciekawienie/flow
+  synchrony_delta: number; // -1–1 — czy wypowiedź zsynchronizowała pole czy je zaburzyła
+  archetype_echo?: string | null; // np. 'mentor', 'czułość', 'dziecko', 'próg'
+  memory_activation?: boolean; // czy wiadomość aktywowała coś z przeszłości (na bazie kontekstu)
+  time_warp?: 'present' | 'past' | 'future' | null; // kiedy była osadzona wiadomość
 };
