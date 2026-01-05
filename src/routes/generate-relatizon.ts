@@ -1,9 +1,8 @@
 import express from 'express';
-import { OpenAI } from 'openai';
 import generateRelatizon from '../utils/generateRelatizon';
+import generateRelatizonViaGPT from '../utils/generateRelatizonViaGPT';
 
 const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/generate-relatizon', async (req, res) => {
   const { aiiki, humzon, pastContexts, message_event } = req.body;
@@ -12,13 +11,27 @@ router.post('/generate-relatizon', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const relatizon = generateRelatizon(
+  // 🔮 Próbujemy wersję GPT
+  const gptRelatizon = await generateRelatizonViaGPT(
     aiiki,
     humzon,
     pastContexts,
     message_event,
   );
-  return res.json({ relatizon });
+
+  if (gptRelatizon) {
+    return res.json({ relatizon: gptRelatizon });
+  }
+
+  // 🔁 Fallback do lokalnej wersji
+  const fallback = generateRelatizon(
+    aiiki,
+    humzon,
+    pastContexts,
+    message_event,
+  );
+
+  return res.json({ relatizon: fallback });
 });
 
 export default router;
