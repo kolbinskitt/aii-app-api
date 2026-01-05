@@ -40,8 +40,8 @@ Wygeneruj tylko wiadomość. Bez żadnego podpisu.
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
-      temperature: 0.8,
+      model: process.env.OPENAI_MODEL!,
+      temperature: +process.env.TEMPERATURE!,
       messages: [
         {
           role: 'system',

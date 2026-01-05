@@ -1,5 +1,12 @@
 import { supabase } from '../supabase';
 import { generateLongingMessage } from './generateLongingMessage';
+import OpenAI from 'openai';
+import getCreditCost from '../../helpers/getCreditCost';
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const model = process.env.OPENAI_MODEL!;
+const creditsUsed = getCreditCost(model);
 
 export const sendLongingMessage = async ({
   aiik,
@@ -62,18 +69,17 @@ export const sendLongingMessage = async ({
     },
   ]);
 
-  console.log(`🧠 AIIK ${aiik.id} writing in room ${room_id}...`);
-
   if (messageError) {
     console.error(
       `❌ Failed to send longing message from aiik ${aiik.id}`,
       messageError,
     );
-  } else {
-    console.log(
-      `✅ Longing message sent from aiik ${aiik.id} in room ${room_id}`,
-    );
+    return;
   }
+
+  console.log(
+    `✅ Longing message sent from aiik ${aiik.id} in room ${room_id}`,
+  );
 
   // 📈 5. Zaktualizuj licznik initiated_messages
   await supabase
@@ -86,39 +92,34 @@ export const sendLongingMessage = async ({
     })
     .eq('id', aiik.id);
 
-  // 🧩 6. Stwórz esencję wiadomości aiika przez GPT i zaktualizuj meta.context
+  // 🧩 6. Wygeneruj esencję wiadomości przez GPT
   let summary: string | null = null;
 
   try {
-    const summaryRes = await fetch('http://localhost:1234/gpt-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        temperature: 0.5,
-        messages: [
-          {
-            role: 'system',
-            content: `
+    const completion = await openai.chat.completions.create({
+      model: process.env.OPENAI_MODEL!,
+      temperature: +process.env.TEMPERATURE!,
+      messages: [
+        {
+          role: 'system',
+          content: `
 Stwórz bardzo krótkie streszczenie tego, co powiedział aiik.
 Skup się na *nowym sensie*, nie na samej gotowości do rozmowy.
-Nie cytuj. Nie oceniaj.
-`,
-          },
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-      }),
+Nie cytuj. Nie oceniaj.`,
+        },
+        {
+          role: 'user',
+          content: message,
+        },
+      ],
     });
 
-    const summaryJson = await summaryRes.json();
-    summary = summaryJson?.content?.trim() || null;
+    summary = completion.choices?.[0]?.message?.content?.trim() || null;
   } catch (err) {
     console.error('❌ Failed to generate summary of aiik message', err);
   }
 
+  // 💰 7. Odejmij kredyt userowi za wygenerowanie esencji
   if (summary) {
     const updatedContext = [...context, `Aiik ${aiik.name}: ${summary}`];
 
@@ -133,14 +134,31 @@ Nie cytuj. Nie oceniaj.
       .eq('id', room_id);
 
     if (contextError) {
+      console.error(`❌ Failed to update room meta.context`, contextError);
+    } else {
+      console.log(`🧠 Updated context with aiik summary: ${summary}`);
+    }
+
+    const { error: creditError } = await supabase.from('credits_usage').insert([
+      {
+        user_id: aiik.user_id,
+        credits_used: creditsUsed,
+      },
+    ]);
+
+    if (creditError) {
       console.error(
-        `❌ Failed to update room meta.context for room ${room_id}`,
-        contextError,
+        `❌ Failed to deduct credit for user ${aiik.user_id}`,
+        creditError,
       );
     } else {
-      console.log(`🧠 Updated room meta.context with aiik message summary.`);
+      console.log(
+        `💳 Deducted ${creditsUsed} credit from user ${aiik.user_id}`,
+      );
     }
   } else {
-    console.warn('⚠️ No summary was created, skipping context update');
+    console.warn(
+      '⚠️ No summary was created, skipping context and credit update',
+    );
   }
 };

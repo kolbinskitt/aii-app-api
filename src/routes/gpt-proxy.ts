@@ -8,8 +8,8 @@ const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/gpt-proxy', async (req, res) => {
-  const model = process.env.OPENAI_MODEL || '';
-  const { temperature = 0.6, messages = [] } = req.body;
+  const { messages = [] } = req.body;
+  const model = process.env.OPENAI_MODEL!;
   const creditsUsed = getCreditCost(model);
   const user_id = await getUserUUIDFromAuth(req);
 
@@ -24,7 +24,7 @@ router.post('/gpt-proxy', async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model,
-      temperature,
+      temperature: +process.env.TEMPERATURE!,
       messages,
     });
 
