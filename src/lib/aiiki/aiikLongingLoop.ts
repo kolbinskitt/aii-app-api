@@ -1,7 +1,7 @@
 import { supabase } from '../supabase';
 import { sendLongingMessage } from './sendLongingMessage';
 
-const CHECK_INTERVAL_MS = 15 * 1000;
+const CHECK_INTERVAL_MS = 15 * 60 * 1000;
 const MAX_MESSAGES_PER_SILENCE = 3;
 
 export const startAiikLongingLoop = () => {
