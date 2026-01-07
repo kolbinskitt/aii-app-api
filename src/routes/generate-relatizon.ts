@@ -1,10 +1,11 @@
 import express from 'express';
+import type { Request, Response } from 'express';
 import generateRelatizon from '../utils/generateRelatizon';
 import generateRelatizonViaGPT from '../utils/generateRelatizonViaGPT';
 
 const router = express.Router();
 
-router.post('/generate-relatizon', async (req, res) => {
+router.post('/generate-relatizon', async (req: Request, res: Response) => {
   const { aiiki, humzon, pastContexts, message_event } = req.body;
 
   if (!aiiki || !humzon || !message_event) {

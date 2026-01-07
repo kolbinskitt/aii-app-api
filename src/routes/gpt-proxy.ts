@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Request, Response } from 'express';
 import { OpenAI } from 'openai';
 import { supabase } from '../lib/supabase';
 import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
@@ -7,7 +8,7 @@ import getCreditCost from '../utils/getCreditCost';
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-router.post('/gpt-proxy', async (req, res) => {
+router.post('/gpt-proxy', async (req: Request, res: Response) => {
   const { messages = [] } = req.body;
   const model = process.env.OPENAI_MODEL!;
   const creditsUsed = getCreditCost(model);

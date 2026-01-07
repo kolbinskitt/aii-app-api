@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
 import gptProxy from './routes/gpt-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
@@ -31,7 +32,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`API listening on port ${PORT}`);
 });
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.send('✨ aiiK API is alive ✨');
 });
 
