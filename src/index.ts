@@ -7,17 +7,28 @@ import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon.js';
 
 dotenv.config();
-const PORT = process.env.PORT || 1234;
+const PORT = Number(process.env.PORT) || 1234;
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(
+  cors({
+    origin: [
+      'http://localhost:5173',
+      'https://kolbinskitt.github.io',
+      'https://kolbinskitt.github.io/aii-app',
+    ],
+    credentials: true,
+  }),
+);
+
 app.use('/auth', authRoutes);
 app.post('/gpt-proxy', gptProxy);
 app.post('/generate-relatizon', generateRelatizon);
 
-app.listen(PORT, () => {
-  console.log(`✨ aiik API listening on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API listening on port ${PORT}`);
 });
 
 app.get('/', (req, res) => {
