@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { ensureUserAiiki } from '../lib/aiiki/ensureUserAiiki.js';
+import { ensureUserAiiki } from '../lib/aiiki/ensureUserAiiki';
 
 dotenv.config();
 
@@ -117,6 +117,10 @@ async function getOrCreateUser(authUser: {
   console.log('✅ Utworzono nowego usera:', newUser.id);
   return newUser;
 }
+
+router.get('/ping', (_req, res) => {
+  res.send('auth ok');
+});
 
 router.post('/ensure-user', async (req, res) => {
   const authHeader = req.headers.authorization;

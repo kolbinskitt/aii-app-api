@@ -1,10 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import authRoutes from './routes/auth.js';
+import authRoutes from './routes/auth';
 import gptProxy from './routes/gpt-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
-import generateRelatizon from './routes/generate-relatizon.js';
+import generateRelatizon from './routes/generate-relatizon';
 
 dotenv.config();
 const PORT = Number(process.env.PORT) || 1234;
