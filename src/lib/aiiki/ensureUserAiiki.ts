@@ -40,8 +40,7 @@ export async function ensureUserAiiki(userId: string) {
       description: aiik.description,
       rezon: aiik.rezon,
       memory: {},
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      avatar_url: aiik.avatar_url,
     }));
 
   if (aiikiToInsert.length === 0) {
