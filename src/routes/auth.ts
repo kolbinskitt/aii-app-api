@@ -96,7 +96,9 @@ async function getOrCreateUser(authUser: {
   // ✋ Jeśli insert zwraca duplikat — fallback!
   if (insertError) {
     if (insertError.code === '23505') {
-      console.warn('🟡 User already exists by email, fallback to fetch');
+      console.warn(
+        `🟡 User already exists by email ${email}, fallback to fetch`,
+      );
 
       const { data: fallbackUser, error: fallbackError } = await supabase
         .from('users')
