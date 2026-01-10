@@ -5,11 +5,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-export async function getOrCreateUser(authUser: {
+type AuthUser = {
   id: string;
   email?: string;
   user_metadata: any;
-}) {
+};
+
+export async function getOrCreateUser(authUser: AuthUser) {
   const auth_id = authUser.id;
   const email = authUser.email;
 
@@ -24,18 +26,22 @@ export async function getOrCreateUser(authUser: {
 
   const profile_pic_url = authUser.user_metadata?.avatar_url ?? null;
 
-  // 1️⃣ ZAWSZE próbuj po auth_id (idempotentne)
-  const { data: byAuth } = await supabase
+  // 1️⃣ IDEMPOTENTNIE: auth_id
+  const { data: byAuth, error: authErr } = await supabase
     .from('users')
     .select('*')
     .eq('auth_id', auth_id)
     .maybeSingle();
 
+  if (authErr) {
+    console.error('🔴 auth_id lookup error:', authErr.message);
+  }
+
   if (byAuth) {
     return byAuth;
   }
 
-  // 2️⃣ Spróbuj INSERT (może się wywalić w race)
+  // 2️⃣ PRÓBA INSERT (race-safe)
   const { data: inserted, error: insertError } = await supabase
     .from('users')
     .insert({
@@ -52,29 +58,48 @@ export async function getOrCreateUser(authUser: {
     return inserted;
   }
 
-  // 3️⃣ DUPLIKAT → ZAWSZE fetch po email (bez warunków!)
+  // 3️⃣ DUPLIKAT EMAIL → ZAWSZE FETCH PO EMAIL
   if (insertError?.code === '23505') {
-    const { data: existingUser, error } = await supabase
+    const { data: existing, error: fetchErr } = await supabase
       .from('users')
       .select('*')
       .eq('email', email)
+      .limit(1)
       .maybeSingle();
 
-    if (error || !existingUser) {
+    if (fetchErr) {
+      console.error('🔴 email fetch error:', fetchErr.message);
+      throw fetchErr;
+    }
+
+    if (!existing) {
       throw new Error(`Duplicate user but cannot fetch by email: ${email}`);
     }
 
-    // 🔒 Upewnij się, że auth_id jest podpięte
-    if (!existingUser.auth_id) {
-      await supabase
+    // 🔒 Jeśli auth_id nie podpięte – podpinamy
+    if (!existing.auth_id) {
+      const { error: updateErr } = await supabase
         .from('users')
         .update({ auth_id })
-        .eq('id', existingUser.id);
+        .eq('id', existing.id);
+
+      if (updateErr) {
+        console.error('🔴 auth_id update error:', updateErr.message);
+        throw updateErr;
+      }
+
+      return { ...existing, auth_id };
     }
 
-    return { ...existingUser, auth_id };
+    // 🚨 Email należy do innego auth_id → REALNY BŁĄD
+    if (existing.auth_id !== auth_id) {
+      throw new Error(`Email ${email} already linked to another auth user`);
+    }
+
+    return existing;
   }
 
-  // 4️⃣ Inny błąd = prawdziwy error
+  // 4️⃣ PRAWDZIWY BŁĄD
+  console.error('❌ user insert error:', insertError?.message);
   throw insertError;
 }
