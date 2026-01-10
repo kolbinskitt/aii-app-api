@@ -107,7 +107,12 @@ async function getOrCreateUser(authUser: {
         .maybeSingle();
 
       if (fallbackError || !fallbackUser) {
-        throw fallbackError || new Error('Could not fetch fallback user');
+        throw (
+          fallbackError ||
+          new Error(
+            `Could not fetch fallback user: ${JSON.stringify(fallbackError)}`,
+          )
+        );
       }
 
       return fallbackUser;
