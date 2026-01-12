@@ -43,17 +43,24 @@ export async function getOrCreateUser(authUser: AuthUser) {
   }
 
   // 2️⃣ PRÓBA INSERT (race-safe)
+  const userData = {
+    auth_id,
+    email,
+    display_name,
+    profile_pic_url,
+    uuic: generateUuic(),
+  };
   const { data: inserted, error: insertError } = await supabase
     .from('users')
-    .insert({
-      auth_id,
-      email,
-      display_name,
-      profile_pic_url,
-      uuic: generateUuic(),
-    })
+    .insert(userData)
     .select()
     .single();
+
+  console.log('AAA', {
+    inserted,
+    insertError,
+    userData,
+  });
 
   if (!insertError && inserted) {
     return inserted;
