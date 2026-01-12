@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { generateUuic } from '../helpers/generateUuic';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -49,12 +50,10 @@ export async function getOrCreateUser(authUser: AuthUser) {
       email,
       display_name,
       profile_pic_url,
-      uuic: '',
+      uuic: generateUuic(),
     })
     .select()
     .single();
-
-  console.log('USERS INSERT', { inserted, insertError });
 
   if (!insertError && inserted) {
     return inserted;
