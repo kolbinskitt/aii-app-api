@@ -54,6 +54,8 @@ export async function getOrCreateUser(authUser: AuthUser) {
     .select()
     .single();
 
+  console.log('USERS INSERT', { inserted, insertError });
+
   if (!insertError && inserted) {
     return inserted;
   }
