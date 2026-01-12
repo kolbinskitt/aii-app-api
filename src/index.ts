@@ -4,11 +4,17 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
 import gptProxy from './routes/gpt-proxy';
+import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
 
 dotenv.config();
 const PORT = Number(process.env.PORT) || 1234;
+
+console.log('🔍 ENV CHECK:', {
+  url: process.env.SUPABASE_URL,
+  key: process.env.SUPABASE_SERVICE_ROLE_KEY,
+});
 
 const app = express();
 app.use(express.json());
@@ -26,6 +32,7 @@ app.use(
 
 app.use('/auth', authRoutes);
 app.post('/gpt-proxy', gptProxy);
+app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);
 
 app.listen(PORT, '0.0.0.0', () => {
