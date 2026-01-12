@@ -4,14 +4,19 @@ import { OpenAI } from 'openai';
 import { supabase } from '../lib/supabase';
 import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
 import getImageCreditCost from '../utils/getImageCreditCost';
-import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/', async (req: Request, res: Response) => {
-  const { prompt, size = '1024x1024', purpose = 'generic', aiik_id } = req.body;
+  const {
+    prompt,
+    size = '1024x1024',
+    purpose = 'generic',
+    aiik_id,
+    path,
+  } = req.body;
 
   const allowedSizes = new Set(['1024x1024', '1024x1536', '1536x1024', 'auto']);
   const requestedSize = typeof size === 'string' ? size : '1024x1024';
@@ -40,16 +45,13 @@ router.post('/', async (req: Request, res: Response) => {
       size: normalizedSize as any,
     });
 
-    const imageUrl = image.data[0]?.url;
-    console.log('GPT IMAGE API RESPONSE:', image);
-    if (!imageUrl) throw new Error('No image returned');
+    const b64 = image.data[0]?.b64_json;
+    if (!b64) throw new Error('No b64 image returned');
 
-    // 2. Pobierz obraz jako binarkę
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    const imageBuffer = Buffer.from(response.data);
+    const imageBuffer = Buffer.from(b64, 'base64');
 
     // 3. Nazwa pliku do storage
-    const fileName = `images/aiiki/${aiik_id ?? uuidv4()}.png`;
+    const fileName = `images/${path}${aiik_id ?? uuidv4()}.png`;
 
     // 4. Upload do Supabase Storage
     const { error: uploadError } = await supabase.storage

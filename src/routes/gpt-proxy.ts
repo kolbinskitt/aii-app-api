@@ -9,7 +9,7 @@ const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/gpt-proxy', async (req: Request, res: Response) => {
-  const { messages = [] } = req.body;
+  const { messages = [], purpose = 'message' } = req.body;
   const model = process.env.OPENAI_MODEL!;
   const creditsUsed = getCreditCost(model);
   const user_id = await getUserUUIDFromAuth(req);
@@ -34,6 +34,7 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
     const { error: insertError } = await supabase.from('credits_usage').insert({
       user_id,
       credits_used: creditsUsed,
+      meta: { purpose },
     });
 
     if (insertError) {

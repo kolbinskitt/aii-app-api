@@ -144,6 +144,7 @@ Nie cytuj. Nie oceniaj.`,
       {
         user_id: aiik.user_id,
         credits_used: creditsUsed,
+        meta: { purpose: 'message-summary' },
       },
     ]);
 

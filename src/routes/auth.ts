@@ -2,7 +2,6 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { ensureUserAiiki } from '../lib/aiiki/ensureUserAiiki';
 import { getOrCreateUser } from '../utils/getOrCreateUser';
 
 dotenv.config();
@@ -47,10 +46,6 @@ router.post('/ensure-user', async (req: Request, res: Response) => {
 
     // 👤 Tworzymy lub pobieramy usera aplikacyjnego
     const user = await getOrCreateUser(authUser.user);
-
-    // 🧠 Zapewniamy aiiki
-    await ensureUserAiiki(user.id);
-
     return res.status(200).json(user);
   } catch (err: any) {
     console.error('🔥 ensure-user fatal error:', err.message || err);

@@ -1,5 +1,5 @@
-import express from 'express';
 import dotenv from 'dotenv';
+import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
@@ -9,12 +9,8 @@ import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
 
 dotenv.config();
-const PORT = Number(process.env.PORT) || 1234;
 
-console.log('🔍 ENV CHECK:', {
-  url: process.env.SUPABASE_URL,
-  key: process.env.SUPABASE_SERVICE_ROLE_KEY,
-});
+const PORT = Number(process.env.PORT) || 1234;
 
 const app = express();
 app.use(express.json());
