@@ -3,6 +3,7 @@ export type Aiik = {
   name: string;
   description: string;
   conzon: ArcheZON;
+  avatar_url: string;
 };
 
 export type ItemWithMeta = {
