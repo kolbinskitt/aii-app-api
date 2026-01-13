@@ -6,16 +6,16 @@ import generateRelatizonViaGPT from '../utils/generateRelatizonViaGPT';
 const router = express.Router();
 
 router.post('/generate-relatizon', async (req: Request, res: Response) => {
-  const { aiiki, humzon, pastContexts, message_event } = req.body;
+  const { aiiki, userConZON, pastContexts, message_event } = req.body;
 
-  if (!aiiki || !humzon || !message_event) {
+  if (!aiiki || !userConZON || !message_event) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   // 🔮 Próbujemy wersję GPT
   const gptRelatizon = await generateRelatizonViaGPT(
     aiiki,
-    humzon,
+    userConZON,
     pastContexts,
     message_event,
   );
@@ -27,7 +27,7 @@ router.post('/generate-relatizon', async (req: Request, res: Response) => {
   // 🔁 Fallback do lokalnej wersji
   const fallback = generateRelatizon(
     aiiki,
-    humzon,
+    userConZON,
     pastContexts,
     message_event,
   );

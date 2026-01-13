@@ -83,15 +83,23 @@ export const sendLongingMessage = async ({
   );
 
   // 📈 5. Zaktualizuj licznik initiated_messages
+  const conzon = aiik.aiiki_conzon?.conzon;
+  const currentInitiated = conzon?.resonance?.initiated_messages ?? 0;
+
   await supabase
-    .from('aiiki')
+    .from('aiiki_conzon')
     .update({
-      rezon: {
-        ...aiik.rezon,
-        initiated_messages: (aiik.rezon.initiated_messages ?? 0) + 1,
+      conzon: {
+        ...conzon,
+        resonance: {
+          ...conzon.resonance,
+          initiated_messages: currentInitiated + 1,
+        },
       },
     })
-    .eq('id', aiik.id);
+    .eq('aiik_id', aiik.id)
+    .order('created_at', { ascending: false }) // tylko jeśli jest więcej niż jeden
+    .limit(1); // tylko najnowszy conZON
 
   // 🧩 6. Wygeneruj esencję wiadomości przez GPT
   let summary: string | null = null;

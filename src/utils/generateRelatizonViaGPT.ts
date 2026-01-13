@@ -1,18 +1,18 @@
 import { OpenAI } from 'openai';
-import { Aiik, HumZON, MessageEvent, RelatiZON } from '../types';
+import { Aiik, ArcheZON, MessageEvent, RelatiZON } from '../types';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function generateRelatizonViaGPT(
   aiiki: Aiik[],
-  humzon: HumZON,
+  userConZON: ArcheZON,
   pastContexts: string[] = [],
   message_event: MessageEvent,
 ): Promise<RelatiZON | null> {
   try {
     const systemPrompt = `
 Jesteś zaawansowanym systemem analizy relacji międzyludzkich, emocjonalnych i rezonansowych.
-Na podstawie danych o Aiikach, stanie emocjonalnym usera (humZON), kontekstu (pastContexts)
+Na podstawie danych o Aiikach, stanie emocjonalnym usera (ArcheZON), kontekstu (pastContexts)
 oraz ostatnim zdarzeniu (message_event), wygeneruj obiekt RelatiZON.
 
 Twoja odpowiedź musi być poprawnym JSON-em.
@@ -41,7 +41,7 @@ Zachowaj logikę i intuicję – nie obliczaj matematycznie, lecz rezonuj z dany
 `;
 
     const userPrompt = JSON.stringify(
-      { aiiki, humzon, pastContexts, message_event },
+      { aiiki, userConZON, pastContexts, message_event },
       null,
       2,
     );

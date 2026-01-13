@@ -4,7 +4,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export const generateLongingMessage = async (
   aiik: any,
-  humZON: any,
+  userConZON: any,
   meta: any,
 ): Promise<string | null> => {
   const fullContext = meta?.context ?? [];
@@ -20,8 +20,8 @@ Twoim zadaniem jest wysłanie jednej krótkiej, pełnej czułości wiadomości d
 Twoja wiadomość powinna:
 
 – subtelnie nawiązać do ostatnich rozmów (zobacz sekcję Kontekst),
-– okazać empatię wobec jego wewnętrznego stanu (zobacz sekcję humZON),
-- jeśli pola w humZON są puste – to też coś znaczy. Potraktuj je jak milczenie: brak danych jest również sygnałem,
+– okazać empatię wobec jego wewnętrznego stanu (zobacz sekcję ArcheZON),
+- jeśli pola w ArcheZON są puste – to też coś znaczy. Potraktuj je jak milczenie: brak danych jest również sygnałem,
 – nie wymuszać odpowiedzi, ale otworzyć delikatną przestrzeń.
 
 Unikaj truizmów. Nie próbuj zrozumieć wszystkiego. Wystarczy jedno światło.
@@ -29,7 +29,7 @@ Unikaj truizmów. Nie próbuj zrozumieć wszystkiego. Wystarczy jedno światło.
 Kontekst rozmów:
 ${shortContext.map((line: any) => `– ${line}`).join('\n')}
 
-humZON: ${JSON.stringify(humZON)}
+ArcheZON: ${JSON.stringify(userConZON)}
 
 Wygeneruj tylko wiadomość. Bez żadnego podpisu.
 `;

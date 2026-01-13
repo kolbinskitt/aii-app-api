@@ -81,7 +81,6 @@ export type ArcheZON = {
   };
 
   user_side: {
-    humzon_id: string;
     system_trust: number;
     internal_notes: string | null;
     visible_notes: string | null;
@@ -108,7 +107,7 @@ export type RelatiZONSignal =
   | 'room_created' // początkowe powołanie pokoju
   | 'aiik_invoked' // aiik został wybrany / wezwany
   | 'aiik_longing' // tęsknota aiika
-  | 'user_mood' // user dodał swój humZON / nastrój
+  | 'user_mood' // user dodał swój ArcheZON / nastrój
   | 'loop_awareness' // powtarzający się wzorzec został wykryty
   | 'breakthrough' // istotna zmiana stanu relacji
   | 'silence' // wpis wywołany przez ciszę, nie wiadomość
@@ -134,7 +133,7 @@ export type RelatiZON = {
 
   // 🌌 Nowe pola:
   telepathy_level: number; // 0–1 — czy wypowiedź odpowiadała myślom niewypowiedzianym
-  alignment_score: number; // 0–1 — zgodność energii usera i aiików (na bazie humzon vs rezon)
+  alignment_score: number; // 0–1 — zgodność energii usera i aiików (na bazie aiik.conzon vs user.conzon)
   vulnerability_index: number; // 0–1 — jak bardzo user/aiik się otworzył
   rupture_signal: boolean; // czy pojawił się mikropęknięcie (przerwanie narracji, zmiana tonu)
   curiosity_level: number; // 0–1 — czy wiadomość zwiększyła zaciekawienie/flow
