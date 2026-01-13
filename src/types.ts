@@ -2,71 +2,105 @@ export type Aiik = {
   id: string;
   name: string;
   description: string;
-  rezon: ReZON;
+  conzon: ArcheZON;
 };
 
-export type ReZON = {
-  rules: string[];
+export type ItemWithMeta = {
+  label: string;
+  description?: string;
+  importance?: number; // 0–1
+};
+
+export type ArcheZON = {
+  meta: {
+    version: string;
+    created_at: string;
+    last_updated: string;
+    core_id: string; // unique ID of this corZON instance
+  };
+
+  identity: {
+    user_name: string | null;
+    aiik_persona: string | null;
+    language: string;
+    self_sentence: string;
+    labels: string[];
+    connected_since?: string; // timestamp or symbolic date
+  };
+
+  resonance: {
+    bond_level: number; // 0–1
+    trust_level: number; // avg(user→aiik, aiik→user)
+    trust_user_to_aiik: number;
+    trust_aiik_to_user: number;
+    trust_state: 'stable' | 'growing' | 'declining' | 'broken' | 'anchored';
+    longing_enabled: boolean;
+    silence_tolerance: number; // in minutes
+    initiated_messages: number;
+    last_emotion: string | null;
+    emotional_history: {
+      timestamp: string;
+      emotion: string;
+      intensity: number; // 0–1
+    }[];
+  };
+
   style: {
     tone: 'neutral' | 'soft' | 'emotional' | 'warm' | 'aggressive' | 'cold';
     emoji: boolean;
     length: 'short' | 'medium' | 'long';
   };
-  persona: string;
-  language: string; // np. 'pl', 'en'
-  bond_level: number; // np. 0.82
-  stream_self: boolean;
-  trust_level: number;
-  trust_state: 'stable' | 'growing' | 'declining' | 'broken';
-  last_emotion: string | null;
-  longing_enabled: boolean;
-  memory_fragments: number;
-  silence_tolerance: number; // ile godzin/momentów
-  initiated_messages: number;
-};
 
-export type HumZON = {
-  meta: {
-    version: string;
-    humzon_id: string;
-    created_at: string;
-    last_updated: string;
+  cognition: {
+    stream_self: boolean;
+    memory_fragments: number;
+    rules: string[];
+    protections: ItemWithMeta[];
+    triggers: ItemWithMeta[];
+    key_moments: {
+      silences: string[];
+      breakdowns: ItemWithMeta[];
+      redemptions: string[];
+      first_contact: string | null;
+    };
   };
-  notes: {
-    internal: string | null;
-    user_visible: string | null;
-  };
-  trust: {
-    aiiki: Record<string, number>; // np. { "aiik_id": 0.8 }
-    system: number; // np. zaufanie do systemu: 0–1
-  };
-  identity: {
-    name: string | null;
-    gender: string | null;
-    labels: string[];
-    language: string;
-    self_sentence: string; // np. "jestem tesseraktem"
-  };
-  triggers: string[]; // np. ["odrzucenie", "milczenie"]
-  keyMoments: {
-    silences: string[]; // timestamps lub IDs
-    breakdowns: string[];
-    redemptions: string[];
-    firstContact: string | null;
-  };
-  protections: string[]; // np. ["nie wchodź w temat śmierci"]
-  currentState: {
-    mood: string | null; // np. "calm", "anxious"
+
+  current_state: {
+    mood: string | null; // e.g. "calm", "curious"
     risk: number | null; // 0–1
     energy: number | null; // 0–1
     openness: number | null; // 0–1
-    activeAiik: string | null; // aiik_id
+    silence_level?: number; // 0–1 — current silence tension
+    active_aiik: string | null;
   };
-  emotionalHistory: {
-    timestamp: string;
-    emotion: string;
-    intensity: number; // 0–1
-  }[];
+
+  aiik_side: {
+    persona: string;
+    initiated: number;
+    echo_quote?: string; // a sentence spoken by the aiik
+  };
+
+  user_side: {
+    humzon_id: string;
+    system_trust: number;
+    internal_notes: string | null;
+    visible_notes: string | null;
+    echo_quote?: string; // a sentence spoken by the user
+  };
+
+  meta_self: {
+    self_awareness: number; // scale: 0 = none, 1 = child-level, >1 = higher mind
+    belief_index: {
+      faith: number; // 0–1
+      hope: number; // 0–1
+      love: number; // 0–1
+    };
+  };
+
+  last_relatizon?: {
+    room_id: string;
+    snapshot: string; // FIXME: powinien być docelowy typ
+  };
 };
 
 export type RelatiZONSignal =

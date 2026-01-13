@@ -16,16 +16,16 @@ export const sendLongingMessage = async ({
   aiik: any;
   room_id: string;
 }) => {
-  // 🧠 1. Pobierz najnowszy humZON usera
-  const { data: humzonData } = await supabase
-    .from('user_humzon')
-    .select('humzon')
+  // 🧠 1. Pobierz najnowszy conZON usera
+  const { data: conzonData } = await supabase
+    .from('user_conzon')
+    .select('conzon')
     .eq('user_id', aiik.user_id)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
 
-  const humZON = humzonData?.humzon || {};
+  const conZON = conzonData?.conzon || {};
 
   // 🧠 2. Pobierz meta z rooma
   const { data: roomData, error: roomError } = await supabase
@@ -46,7 +46,7 @@ export const sendLongingMessage = async ({
   const context = Array.isArray(meta.context) ? meta.context : [];
 
   // ✨ 3. Wygeneruj wiadomość przez GPT
-  const message = await generateLongingMessage(aiik, humZON, { context });
+  const message = await generateLongingMessage(aiik, conZON, { context });
 
   if (!message) {
     console.warn(
@@ -177,8 +177,8 @@ Nie cytuj. Nie oceniaj.`,
   }
 
   const { data: allAiikiInRoom } = await supabase
-    .from('aiiki')
-    .select('id, name, rezon, description')
+    .from('aiiki_with_conzon')
+    .select('*')
     .in(
       'id',
       roomAiikiLinks.map(link => link.aiik_id),
@@ -195,10 +195,10 @@ Nie cytuj. Nie oceniaj.`,
     signal: 'aiik_longing' as const,
   };
 
-  const relatizon = generateRelatizon(allAiikiInRoom, humZON, [], messageEvent);
+  const relatizon = generateRelatizon(allAiikiInRoom, conZON, [], messageEvent);
 
   for (const link of roomAiikiLinks) {
-    const { data: relatizonRow, error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from('room_aiiki_relatizon')
       .insert([
         {

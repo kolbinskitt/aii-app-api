@@ -1,14 +1,14 @@
-import { Aiik, HumZON, MessageEvent, RelatiZON } from '../types';
+import { Aiik, ArcheZON, MessageEvent, RelatiZON } from '../types';
 
 export default function generateRelatizon(
   aiiki: Aiik[],
-  userHumzon: HumZON,
+  userConzon: ArcheZON,
   pastContexts: string[] = [],
   message_event: MessageEvent,
 ): RelatiZON {
   // 1. Silence tension
   const baseAnxiety =
-    userHumzon.currentState?.risk ?? userHumzon.currentState?.openness ?? 0.2;
+    userConzon.current_state.risk ?? userConzon.current_state.openness ?? 0.2;
 
   const tensionLevel = Math.min(baseAnxiety * 0.8, 1);
   const tensionState =
@@ -35,15 +35,18 @@ export default function generateRelatizon(
 
   // 3. Bond depth
   const bondDepth =
-    aiiki.reduce((sum, aiik) => sum + (aiik.rezon?.trust_level ?? 0.1), 0) /
-    Math.max(aiiki.length, 1);
+    aiiki.reduce(
+      (sum, aiik) => sum + (aiik.conzon?.resonance?.trust_level ?? 0.1),
+      0,
+    ) / Math.max(aiiki.length, 1);
 
   // 4. Last emotion
   const lastEmotion =
-    userHumzon.emotionalHistory.length > 0
-      ? userHumzon.emotionalHistory[userHumzon.emotionalHistory.length - 1]
-          .emotion
-      : userHumzon.currentState?.mood ?? null;
+    userConzon.resonance.emotional_history.length > 0
+      ? userConzon.resonance.emotional_history[
+          userConzon.resonance.emotional_history.length - 1
+        ].emotion
+      : userConzon.current_state.mood ?? null;
 
   // 🌌 Nowe wskaźniki
 
@@ -51,7 +54,7 @@ export default function generateRelatizon(
   const telepathyLevel = Math.random() * 0.3 + 0.3; // 0.3 – 0.6
 
   // 6. Alignment score – zgodność energii (średnia z openness vs aiik.description.length/1000)
-  const userOpenness = userHumzon.currentState?.openness ?? 0.2;
+  const userOpenness = userConzon.current_state.openness ?? 0.2;
   const avgAiikSize =
     aiiki.reduce((sum, a) => sum + (a.description?.length ?? 0), 0) /
     Math.max(aiiki.length * 1000, 1);
@@ -59,16 +62,13 @@ export default function generateRelatizon(
 
   // 7. Vulnerability index – jak bardzo user "puścił coś osobistego"
   const vulnerabilityIndex =
-    userHumzon.currentState?.risk ?? Math.random() * 0.3;
+    userConzon.current_state.risk ?? Math.random() * 0.3;
 
   // 8. Rupture signal – losowe mikro-pęknięcie
   const rupture_signal = Math.random() < 0.1; // 10% szans
 
   // 9. Curiosity level – wzrost zaciekawienia (na bazie openness +  losowości)
-  const curiosityLevel = Math.min(
-    (userOpenness ?? 0.2) + Math.random() * 0.3,
-    1,
-  );
+  const curiosityLevel = Math.min(userOpenness + Math.random() * 0.3, 1);
 
   // 10. Synchrony delta – czy synchronizacja się pogłębiła
   const synchronyDelta = Math.random() * 2 - 1; // −1 to +1

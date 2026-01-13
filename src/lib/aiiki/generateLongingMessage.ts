@@ -7,10 +7,6 @@ export const generateLongingMessage = async (
   humZON: any,
   meta: any,
 ): Promise<string | null> => {
-  const persona =
-    aiik.reZON?.persona ||
-    'głęboko empatyczny, czujący istnienie przewodnik Jaźni';
-
   const fullContext = meta?.context ?? [];
   const shortContext = fullContext.slice(-5); // 👉 tylko ostatnie 5 wpisów trafia do promptu
 
