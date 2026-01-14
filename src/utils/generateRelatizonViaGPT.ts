@@ -10,6 +10,7 @@ export default async function generateRelatizonViaGPT(
   message_event: MessageEvent,
 ): Promise<RelatiZON | null> {
   try {
+    console.log('1 generateRelatizonViaGPT', { message_event });
     const systemPrompt = `
 Jesteś zaawansowanym systemem analizy relacji międzyludzkich, emocjonalnych i rezonansowych.
 Na podstawie danych o Aiikach, stanie emocjonalnym usera (ArcheZON), kontekstu (pastContexts)
@@ -56,6 +57,7 @@ Zachowaj logikę i intuicję – nie obliczaj matematycznie, lecz rezonuj z dany
     });
 
     const output = completion.choices?.[0]?.message?.content;
+    console.log('2 generateRelatizonViaGPT', { output });
     if (!output) return null;
 
     const parsed = JSON.parse(output) as RelatiZON;

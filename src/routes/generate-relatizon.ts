@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/generate-relatizon', async (req: Request, res: Response) => {
   const { aiiki, userConZON, pastContexts, message_event } = req.body;
-
+  console.log('generate-relatizon', { message_event });
   if (!aiiki || !userConZON || !message_event) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
