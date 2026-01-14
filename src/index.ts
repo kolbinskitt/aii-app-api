@@ -7,6 +7,7 @@ import gptProxy from './routes/gpt-proxy';
 import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
+import llmProxy from './routes/llm-proxy';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/auth', authRoutes);
 app.post('/gpt-proxy', gptProxy);
 app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);
+app.use('/llm-proxy', llmProxy);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API listening on port ${PORT}`);
