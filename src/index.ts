@@ -4,6 +4,7 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
 import gptProxy from './routes/gpt-proxy';
+import generateEmbedding from './routes/generate-embedding';
 import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
@@ -29,6 +30,7 @@ app.use(
 
 app.use('/auth', authRoutes);
 app.post('/gpt-proxy', gptProxy);
+app.post('/generate-embedding', generateEmbedding);
 app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);
 app.use('/mistral-proxy', mistralProxy);

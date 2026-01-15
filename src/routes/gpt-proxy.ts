@@ -1,12 +1,11 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import { OpenAI } from 'openai';
 import { supabase } from '../lib/supabase';
 import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
 import getCreditCost from '../utils/getCreditCost';
+import { openai } from '../lib/openai';
 
 const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/gpt-proxy', async (req: Request, res: Response) => {
   const { messages = [], purpose = 'message' } = req.body;
