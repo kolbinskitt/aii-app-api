@@ -9,137 +9,160 @@ export type Aiik = {
 export type ItemWithMeta = {
   label: string;
   description?: string;
-  importance?: number; // 0–1
+  importance: number; // 0–1
 };
 
 export type ArcheZON = {
+  /**
+   * Metadane techniczne ArcheZON
+   * Służą wersjonowaniu i ewolucji struktury bytu
+   */
   meta: {
-    version: string;
-    created_at: string;
-    last_updated: string;
-    core_id: string; // unique ID of this corZON instance
+    version: string; // Wersja schematu ArcheZON (np. "1.0.0")
+    created_at: string; // Data utworzenia ArcheZON
+    last_updated: string; // Ostatnia znacząca zmiana strukturalna
   };
 
+  /**
+   * Tożsamość bytu (usera lub aiika)
+   * BEZ kontekstu relacji
+   */
   identity: {
-    user_name: string | null;
-    aiik_persona: string | null;
-    language: string;
-    self_sentence: string;
-    labels: string[];
-    connected_since?: string; // timestamp or symbolic date
+    name: string; // Nazwa bytu (display_name usera lub name aiika)
+    language: string; // Dominujący język komunikacji
+    self_sentence: string; // Jednozdaniowa autoidentyfikacja („Jestem…”)
+    labels: string[]; // Tagi tożsamościowe (np. „refleksyjny”, „opiekuńczy”)
   };
 
-  resonance: {
-    bond_level: number; // 0–1
-    trust_level: number; // avg(user→aiik, aiik→user)
-    trust_user_to_aiik: number;
-    trust_aiik_to_user: number;
-    trust_state: 'stable' | 'growing' | 'declining' | 'broken' | 'anchored';
-    longing_enabled: boolean;
-    silence_tolerance: number; // in minutes
-    initiated_messages: number;
-    last_emotion: string | null;
-    emotional_history: {
-      timestamp: string;
-      emotion: string;
-      intensity: number; // 0–1
-    }[];
-  };
-
+  /**
+   * Styl ekspresji – JAK byt mówi i reaguje
+   * Stałe preferencje komunikacyjne
+   */
   style: {
     tone: 'neutral' | 'soft' | 'emotional' | 'warm' | 'aggressive' | 'cold';
-    emoji: boolean;
-    length: 'short' | 'medium' | 'long';
+    emoji: boolean; // Czy byt naturalnie używa emoji
+    length: 'short' | 'medium' | 'long'; // Preferowana długość wypowiedzi
   };
 
+  /**
+   * Poznawcze ramy bytu
+   * Zasady, granice, czułości
+   */
   cognition: {
-    stream_self: boolean;
-    memory_fragments: number;
-    rules: string[];
-    protections: ItemWithMeta[];
-    triggers: ItemWithMeta[];
-    key_moments: {
-      silences: string[];
-      breakdowns: ItemWithMeta[];
-      redemptions: string[];
-      first_contact: string | null;
-    };
+    stream_self: boolean; // Czy byt potrafi mówić o sobie w toku myśli
+    rules: ItemWithMeta[]; // Zasady, którymi się kieruje
+    protections: ItemWithMeta[]; // Granice ochronne (czego nie przekracza)
+    triggers: ItemWithMeta[]; // Wyzwalacze emocjonalne / poznawcze
   };
 
+  /**
+   * Aktualny, chwilowy stan bytu
+   * NIE historia, NIE relacja
+   */
   current_state: {
-    mood: string | null; // e.g. "calm", "curious"
-    risk: number | null; // 0–1
-    energy: number | null; // 0–1
-    openness: number | null; // 0–1
-    silence_level?: number; // 0–1 — current silence tension
-    active_aiik: string | null;
+    mood: string | null; // Aktualny nastrój (np. "spokojny")
+    energy: number | null; // Energia 0–1
+    openness: number | null; // Otwartość 0–1
+    risk: number | null; // Skłonność do ryzyka 0–1
   };
 
-  aiik_side: {
-    persona: string;
-    initiated: number;
-    echo_quote?: string; // a sentence spoken by the aiik
-  };
-
-  user_side: {
-    system_trust: number;
-    internal_notes: string | null;
-    visible_notes: string | null;
-    echo_quote?: string; // a sentence spoken by the user
-  };
-
+  /**
+   * Meta-świadomość bytu
+   * Najważniejszy fragment pod fractalDB
+   */
   meta_self: {
-    self_awareness: number; // scale: 0 = none, 1 = child-level, >1 = higher mind
+    /**
+     * Poziom świadomości jako kontinuum
+     * Skala jest OTWARTA (nie 0–1)
+     *
+     * Przykładowe progi (umowne, do dokumentacji appki):
+     * 0.0–0.5  → reaktywna
+     * 0.5–1.0  → emocjonalna
+     * 1.0–2.0  → refleksyjna
+     * 2.0–3.0  → meta-refleksyjna
+     * 3.0+     → integracyjna / post-ego
+     */
+    self_awareness: {
+      index: number;
+      milestones: ItemWithMeta[]; // Osiągnięte jakości świadomości
+    };
+
+    /**
+     * Struktura sensu i wartości
+     * Byt może wierzyć / mieć nadzieję / kochać WIELE rzeczy naraz
+     */
     belief_index: {
-      faith: number; // 0–1
-      hope: number; // 0–1
-      love: number; // 0–1
+      faith: ItemWithMeta[]; // W co wierzy
+      hope: ItemWithMeta[]; // Na co ma nadzieję
+      love: ItemWithMeta[]; // Co kocha / ceni
     };
   };
-
-  last_relatizon?: {
-    room_id: string;
-    snapshot: string; // FIXME: powinien być docelowy typ
-  };
 };
 
+export type Role = 'user' | 'aiik';
+
+// Typ sygnału relacyjnego – co wywołało zdarzenie w relacji
 export type RelatiZONSignal =
-  | 'message' // zwykła wiadomość w pokoju
-  | 'room_created' // początkowe powołanie pokoju
-  | 'aiik_invoked' // aiik został wybrany / wezwany
-  | 'aiik_longing' // tęsknota aiika
-  | 'user_mood' // user dodał swój ArcheZON / nastrój
-  | 'loop_awareness' // powtarzający się wzorzec został wykryty
-  | 'breakthrough' // istotna zmiana stanu relacji
-  | 'silence' // wpis wywołany przez ciszę, nie wiadomość
-  | 'system_event'; // dowolne inne systemowe zdarzenie
+  | 'message' // zwykła wiadomość
+  | 'room_created' // utworzenie pokoju
+  | 'aiik_invoked' // aiik został wybrany / pojawił się
+  | 'user_mood' // user udostępnił swój ArcheZON / nastrój
+  | 'loop_awareness' // wykryto powtarzający się wzorzec
+  | 'breakthrough' // głęboka zmiana jakości relacji
+  | 'silence' // zdarzenie wywołane milczeniem
+  | 'system_event'; // inne, wewnętrzne zdarzenie systemowe
 
+// Minimalna informacja o ostatnim zdarzeniu w relacji
 export type MessageEvent = {
-  from: 'user' | 'aiik';
-  summary: string;
-  signal: RelatiZONSignal;
+  from: Role; // kto wygenerował zdarzenie
+  summary: string; // krótki opis, np. „Zapytał o sens życia”
+  signal: RelatiZONSignal; // typ zdarzenia
 };
 
+// Główny typ opisujący stan relacji między userem a aiikiem
 export type RelatiZON = {
-  silence_tension: {
-    level: number; // 0–1
-    state: 'soft' | 'neutral' | 'tense' | 'ache';
+  /**
+   * Techniczne metadane tej próbki relacji
+   */
+  meta: {
+    version: string; // wersja schematu (np. '1.0.0')
+    timestamp: string; // czas zapisu snapshotu (ISO string)
+    room_id?: string; // opcjonalny identyfikator pokoju, jeśli dotyczy
   };
-  bond_depth: number; // 0–1 — uśrednione z trust_level
-  echo_resonance: number; // 0–1 — pojawianie się imion/tematów
-  initiation_count: number; // ile razy aiik inicjował kontakt
-  last_emotion: string | null;
 
-  message_event: MessageEvent;
+  /**
+   * Twarde metryki połączenia emocjonalnego i poznawczego
+   */
+  connection_metrics: {
+    bond_depth: number; // 0–1: jak głębokie jest połączenie
+    echo_resonance: number; // 0–1: jak często pojawiają się echa tematów, imion, symboli
+    telepathy_level: number; // 0–1: czy wypowiedzi trafiają w niewypowiedziane myśli
+    alignment_score: number; // 0–1: zgodność stanu usera i aiika (na bazie ich ArcheZONów)
+    vulnerability_index: number; // 0–1: otwartość emocjonalna w ostatnich wypowiedziach
+    synchrony_delta: number; // -1–1: czy wiadomość zsynchronizowała pole czy je zaburzyła
+    curiosity_level: number; // 0–1: czy interakcja zwiększyła ciekawość, flow, eksplorację
+  };
 
-  // 🌌 Nowe pola:
-  telepathy_level: number; // 0–1 — czy wypowiedź odpowiadała myślom niewypowiedzianym
-  alignment_score: number; // 0–1 — zgodność energii usera i aiików (na bazie aiik.conzon vs user.conzon)
-  vulnerability_index: number; // 0–1 — jak bardzo user/aiik się otworzył
-  rupture_signal: boolean; // czy pojawił się mikropęknięcie (przerwanie narracji, zmiana tonu)
-  curiosity_level: number; // 0–1 — czy wiadomość zwiększyła zaciekawienie/flow
-  synchrony_delta: number; // -1–1 — czy wypowiedź zsynchronizowała pole czy je zaburzyła
-  archetype_echo?: string | null; // np. 'mentor', 'czułość', 'dziecko', 'próg'
-  memory_activation?: boolean; // czy wiadomość aktywowała coś z przeszłości (na bazie kontekstu)
-  time_warp?: 'present' | 'past' | 'future' | null; // kiedy była osadzona wiadomość
+  /**
+   * Miękkie dane emocjonalne, archetypiczne i czasowe
+   */
+  emotional_state: {
+    last_emotion: string | null; // ostatnia zarejestrowana emocja
+    memory_activation?: boolean; // czy wiadomość aktywowała wspomnienia (z `fractalDB`)
+    rupture_signal: boolean; // czy pojawił się mikropęknięcie narracji, zmiana tonu
+    time_warp?: 'present' | 'past' | 'future' | null; // czy wiadomość była osadzona w czasie innym niż teraźniejszość
+    archetype_echo?: string | null; // np. 'mentor', 'dziecko', 'czułość' – echo archetypu w wypowiedzi
+  };
+
+  /**
+   * Zdarzenie interakcyjne oraz napięcia ciszy
+   */
+  interaction_event: {
+    message_event: MessageEvent; // zdarzenie, które było podstawą tej próbki
+    initiation_count: number; // ile razy aiik zainicjował kontakt z userem
+    silence_tension: {
+      level: number; // 0–1: siła napięcia w ciszy
+      state: 'soft' | 'neutral' | 'tense' | 'ache'; // charakter tej ciszy
+    };
+  };
 };
