@@ -8,8 +8,7 @@ export const startAiikLongingLoop = () => {
   setInterval(async () => {
     const { data: aiiki, error } = await supabase
       .from('aiiki_with_conzon')
-      .select('id, user_id, name, conzon')
-      .not('user_id', 'is', null);
+      .select('id, name, conzon');
 
     if (error || !aiiki) {
       console.error('❌ Error fetching aiiki_with_conzon:', error);
