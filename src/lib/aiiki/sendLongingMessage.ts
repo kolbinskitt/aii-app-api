@@ -200,7 +200,7 @@ Nie cytuj. Nie oceniaj.`,
   const messageEvent = {
     from: 'aiik' as const,
     summary: summary || `Aiik ${aiik.name} wysłał wiadomość tęsknoty`,
-    signal: 'aiik_longing' as const,
+    signal: 'silence' as const,
   };
 
   const relatizon = generateRelatizon(allAiikiInRoom, conZON, [], messageEvent);
