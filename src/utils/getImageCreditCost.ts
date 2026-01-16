@@ -1,7 +1,7 @@
 export default function getImageCreditCost(size: string): number {
   switch (size) {
     case '1024x1024':
-      return 0.002; // ≈ 4x gpt-4-turbo
+      return 0.002;
     case '1024x1536':
     case '1536x1024':
       return 0.003;

@@ -166,3 +166,38 @@ export type RelatiZON = {
     };
   };
 };
+
+export interface ParsedMessage {
+  message: string;
+  response: string;
+  message_summary: string;
+  response_summary: string;
+  user_memory: MemoryFragment[];
+  aiik_memory: MemoryFragment[];
+  response_could_be_better: {
+    value: boolean;
+    reason: string;
+  };
+}
+
+export const allowedMemoryTypes = [
+  'memory', // 🧠 Trwały fakt — np. "Mam na imię Piotr", "Pracuję w IT"
+  'insight', // 💡 Wewnętrzne zrozumienie — np. "Zauważyłem, że boję się zmian"
+  'context', // 🌍 Tymczasowa informacja — np. "Rozmawiamy dziś o relacjach"
+  'intention', // 🎯 Intencja działania — np. "Chcę założyć własną firmę"
+  'reinforcement', // 🔁 Powtórzenie, które wzmacnia pamięć — np. "Lubię lody" (powiedziane kilka razy)
+  'question', // ❓ Pytanie, które warto zapamiętać — np. "Kim jestem bez mojej pracy?"
+  'quote', // 💬 Cytat — szczególnie istotne zdanie, np. "Nie musisz być doskonały, by być wystarczający"
+  'emotion', // 🔥 Silne uczucie — np. "Czuję żal", "Mam w sobie spokój"
+  'emergence', // 🌱 Coś nowego, co się urodziło — np. "Z tej rozmowy wyłania się nowa decyzja"
+  'reference', // 📎 Odniesienie do wcześniejszego wydarzenia lub rozmowy — np. "Tak jak mówiłem tydzień temu..."
+  'custom', // ✨ Dowolny inny — jeśli nie pasuje do żadnego z powyższych
+] as const;
+
+export type MemoryType = (typeof allowedMemoryTypes)[number];
+
+export type MemoryFragment = {
+  content: string;
+  reason: string;
+  type: MemoryType;
+};
