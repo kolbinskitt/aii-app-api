@@ -5,7 +5,45 @@ import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
 import getCreditCost from '../utils/getCreditCost';
 import { openai } from '../lib/openai';
 
+interface ParsedMessage {
+  message: string;
+  response: string;
+  message_summary: string;
+  response_summary: string;
+  user_memory: any[];
+  aiik_memory: any[];
+}
+
 const router = express.Router();
+
+const memoryFragmentSchema = {
+  type: 'array',
+  items: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['content', 'reason', 'type'],
+    properties: {
+      content: { type: 'string' },
+      reason: { type: 'string' },
+      type: {
+        type: 'string',
+        enum: [
+          'memory',
+          'insight',
+          'context',
+          'intention',
+          'reinforcement',
+          'question',
+          'quote',
+          'emotion',
+          'emergence',
+          'reference',
+          'custom',
+        ],
+      },
+    },
+  },
+};
 
 router.post('/gpt-proxy', async (req: Request, res: Response) => {
   const { messages = [], purpose = 'message' } = req.body;
@@ -26,25 +64,71 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
       model,
       temperature: +process.env.TEMPERATURE!,
       messages,
+
+      // ✅ STRUCTURED OUTPUT — HARD GUARANTEE JSON
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'aiik_response',
+          strict: true,
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: [
+              'message',
+              'response',
+              'message_summary',
+              'response_summary',
+              'user_memory',
+              'aiik_memory',
+            ],
+            properties: {
+              message: { type: 'string' },
+              response: { type: 'string' },
+              message_summary: { type: 'string' },
+              response_summary: { type: 'string' },
+              user_memory: memoryFragmentSchema,
+              aiik_memory: memoryFragmentSchema,
+            },
+          },
+        },
+      },
     });
 
-    const content = completion.choices[0]?.message?.content || '';
+    try {
+      const parsed: ParsedMessage = JSON.parse(
+        completion.choices[0]?.message.content,
+      );
 
-    const { error: insertError } = await supabase.from('credits_usage').insert({
-      user_id,
-      credits_used: creditsUsed,
-      meta: { purpose },
-    });
+      if (!parsed) {
+        return res
+          .status(500)
+          .json({ error: 'Brak content response z OpenAI' });
+      }
 
-    if (insertError) {
-      console.error('❌ Błąd przy insercie do credits_usage:', insertError);
-      // Jeśli chcesz: możesz nadal zwrócić content, albo zablokować odpowiedź
-      return res.status(500).json({
-        error: 'GPT wygenerowano, ale nie udało się zapisać zużycia kredytów.',
-      });
+      const { error: insertError } = await supabase
+        .from('credits_usage')
+        .insert({
+          user_id,
+          credits_used: creditsUsed,
+          meta: { purpose },
+        });
+
+      if (insertError) {
+        console.error('❌ Błąd przy insercie do credits_usage:', insertError);
+        return res.status(500).json({
+          error:
+            'GPT wygenerowano, ale nie udało się zapisać zużycia kredytów.',
+        });
+      }
+
+      // ✅ Zwracasz już OBIEKT, nie string
+      return res.status(200).json({ content: parsed });
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ error: 'Niepoprawny JSON response z OpenAI', err });
     }
-
-    return res.status(200).json({ content });
   } catch (err) {
     console.error('🔥 GPT Proxy Error:', err);
     return res.status(500).json({ error: 'GPT proxy call failed' });
