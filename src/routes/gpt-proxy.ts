@@ -16,7 +16,10 @@ const router = express.Router();
 
 const CHEAP_MODEL = process.env.OPENAI_MODEL_CHEAP!;
 const EXPENSIVE_MODEL = process.env.OPENAI_MODEL_EXPENSIVE!;
-const TEMPERATURE = +process.env.TEMPERATURE!;
+const OPENAI_MODEL_CHEAP_TEMPERATURE =
+  +process.env.OPENAI_MODEL_CHEAP_TEMPERATURE!;
+const OPENAI_MODEL_EXPENSIVE_TEMPERATURE =
+  +process.env.OPENAI_MODEL_EXPENSIVE_TEMPERATURE!;
 
 function isValidMemoryType(value: any): value is MemoryType {
   const isValid = allowedMemoryTypes.includes(value);
@@ -68,7 +71,7 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
     console.log(`Try with cheap model: ${CHEAP_MODEL}`);
     const completionCheap = await openai.chat.completions.create({
       model: CHEAP_MODEL,
-      temperature: TEMPERATURE,
+      temperature: OPENAI_MODEL_CHEAP_TEMPERATURE,
       messages,
     });
 
@@ -95,7 +98,7 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
 
       const completionExpensive = await openai.chat.completions.create({
         model: EXPENSIVE_MODEL,
-        temperature: TEMPERATURE,
+        temperature: OPENAI_MODEL_EXPENSIVE_TEMPERATURE,
         messages,
         response_format: responseFormat,
       });
