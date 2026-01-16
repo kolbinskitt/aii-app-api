@@ -6,6 +6,8 @@ import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
 import getImageCreditCost from '../utils/getImageCreditCost';
 import { v4 as uuidv4 } from 'uuid';
 
+const model = process.env.OPENAI_IMAGE_MODEL!;
+
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -40,7 +42,7 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     // 1. Generuj obraz
     const image = await openai.images.generate({
-      model: 'gpt-image-1',
+      model,
       prompt,
       size: normalizedSize as any,
     });
