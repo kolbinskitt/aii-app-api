@@ -1,18 +1,39 @@
 import { ChatCompletionCreateParams } from 'openai/resources/chat';
-import { allowedMemoryTypes } from '../types';
 
 const memoryFragmentSchema = {
   type: 'array',
   items: {
     type: 'object',
     additionalProperties: false,
-    required: ['content', 'reason', 'type'],
+    required: [
+      'content',
+      'interpretation',
+      'reason',
+      'weight',
+      'tags',
+      'traits',
+      'relates_to',
+    ],
     properties: {
       content: { type: 'string' },
+      interpretation: { type: 'string' },
       reason: { type: 'string' },
-      type: {
-        type: 'string',
-        enum: allowedMemoryTypes,
+      weight: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+      },
+      tags: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+      traits: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+      relates_to: {
+        type: 'array',
+        items: { type: 'string' },
       },
     },
   },

@@ -4,12 +4,7 @@ import { supabase } from '../lib/supabase';
 import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
 import getCreditCost from '../utils/getCreditCost';
 import { openai } from '../lib/openai';
-import {
-  ParsedMessage,
-  allowedMemoryTypes,
-  MemoryType,
-  MemoryFragment,
-} from '../types';
+import { ParsedMessage, MemoryFragment } from '../types';
 import { responseFormat } from '../helpers/gptSchema';
 
 const router = express.Router();
@@ -21,22 +16,29 @@ const OPENAI_MODEL_CHEAP_TEMPERATURE =
 const OPENAI_MODEL_EXPENSIVE_TEMPERATURE =
   +process.env.OPENAI_MODEL_EXPENSIVE_TEMPERATURE!;
 
-function isValidMemoryType(value: any): value is MemoryType {
-  const isValid = allowedMemoryTypes.includes(value);
-  return isValid;
-}
-
 function isValidMemoryFragment(obj: any): obj is MemoryFragment {
-  const isValid =
+  return (
     obj &&
     typeof obj.content === 'string' &&
+    obj.content !== '' &&
+    typeof obj.interpretation === 'string' &&
+    obj.interpretation !== '' &&
     typeof obj.reason === 'string' &&
-    isValidMemoryType(obj.type);
-  return isValid;
+    obj.reason !== '' &&
+    typeof obj.weight === 'number' &&
+    obj.weight >= 0 &&
+    obj.weight <= 1 &&
+    typeof obj.tags === 'object' &&
+    Array.isArray(obj.tags) &&
+    typeof obj.traits === 'object' &&
+    Array.isArray(obj.traits) &&
+    typeof obj.relates_to === 'object' &&
+    Array.isArray(obj.relates_to)
+  );
 }
 
 function isValidParsedMessage(obj: any): obj is ParsedMessage {
-  const isValid =
+  return (
     obj &&
     typeof obj.message === 'string' &&
     typeof obj.response === 'string' &&
@@ -48,8 +50,8 @@ function isValidParsedMessage(obj: any): obj is ParsedMessage {
     Array.isArray(obj.user_memory) &&
     Array.isArray(obj.aiik_memory) &&
     obj.user_memory.every(isValidMemoryFragment) &&
-    obj.aiik_memory.every(isValidMemoryFragment);
-  return isValid;
+    obj.aiik_memory.every(isValidMemoryFragment)
+  );
 }
 
 router.post('/gpt-proxy', async (req: Request, res: Response) => {
@@ -77,7 +79,6 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
 
     usedModels.push(CHEAP_MODEL);
     totalCreditsUsed += getCreditCost(CHEAP_MODEL);
-
     const rawContent = completionCheap.choices[0]?.message?.content ?? '';
     let parsed: ParsedMessage | null = null;
 
@@ -86,15 +87,12 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
       if (isValidParsedMessage(candidate)) {
         parsed = candidate;
       }
-    } catch (_) {
-      // ignore JSON.parse error for now
+    } catch (_err) {
+      // ignore
     }
 
-    // 🔁 Jeśli parsed jest null lub sugeruje lepszy model – fallback
     if (!parsed || parsed.response_could_be_better.value) {
-      console.log(
-        `Fallback to expensive model: ${EXPENSIVE_MODEL} because: ${rawContent}`,
-      );
+      console.log(`Fallback to expensive model: ${EXPENSIVE_MODEL}`);
 
       const completionExpensive = await openai.chat.completions.create({
         model: EXPENSIVE_MODEL,
@@ -137,7 +135,6 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
       }
     }
 
-    // ✅ parsed z taniego modelu jest poprawny i wystarczający
     await supabase.from('credits_usage').insert({
       user_id,
       credits_used: totalCreditsUsed,
