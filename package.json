@@ -1,13 +1,13 @@
 {
   "name": "aii-app-api",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r dotenv/config -r tsconfig-paths/register src/index.ts",
     "build": "tsup src/index.ts --out-dir dist --format esm,cjs --dts",
     "start": "node -r tsconfig-paths/register dist/index.js",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
   "devDependencies": {
