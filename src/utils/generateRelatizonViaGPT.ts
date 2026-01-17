@@ -75,7 +75,7 @@ Wygeneruj wyłącznie poprawny JSON.
     );
 
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL!,
+      model: process.env.OPENAI_MODEL_CHEAP!,
       temperature: 0.7,
       messages: [
         { role: 'system', content: systemPrompt.trim() },

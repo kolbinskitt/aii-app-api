@@ -8,6 +8,7 @@ import generateEmbedding from './routes/generate-embedding';
 import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
+import getRelevantMemory from '@/routes/get-relevant-memory';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.post('/gpt-proxy', gptProxy);
 app.post('/generate-embedding', generateEmbedding);
 app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);
+app.use('/get-relevant-memory', getRelevantMemory);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API listening on port ${PORT}`);

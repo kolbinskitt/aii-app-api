@@ -6,7 +6,7 @@ import generateRelatizon from '../../utils/generateRelatizon';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const model = process.env.OPENAI_MODEL!;
+const model = process.env.OPENAI_MODEL_CHEAP!;
 const creditsUsed = getCreditCost(model);
 
 export const sendLongingMessage = async ({
@@ -106,7 +106,7 @@ export const sendLongingMessage = async ({
 
   try {
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL!,
+      model: process.env.OPENAI_MODEL_CHEAP!,
       temperature: +process.env.TEMPERATURE!,
       messages: [
         {

@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import { openai } from '../lib/openai';
-import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
+import { createEmbedding } from '@/lib/openai';
+import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
 
 const router = express.Router();
 
@@ -20,12 +20,7 @@ router.post('/generate-embedding', async (req: Request, res: Response) => {
   }
 
   try {
-    const response = await openai.embeddings.create({
-      model: 'text-embedding-ada-002',
-      input: text,
-    });
-
-    const embedding = response.data[0]?.embedding;
+    const embedding = await createEmbedding(text);
 
     if (!embedding) {
       return res

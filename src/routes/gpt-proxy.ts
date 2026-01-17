@@ -1,11 +1,12 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import { supabase } from '../lib/supabase';
-import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
-import getCreditCost from '../utils/getCreditCost';
-import { openai } from '../lib/openai';
-import { ParsedMessage, MemoryFragment } from '../types';
-import { responseFormat } from '../helpers/gptSchema';
+import { supabase } from '@/lib/supabase';
+import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
+import getCreditCost from '@/utils/getCreditCost';
+import { openai } from '@/lib/openai';
+import { ParsedMessage } from '@/types';
+import { responseFormat } from '@/helpers/gptSchema';
+import { isValidParsedMessage } from '@/helpers/gptProxy';
 
 const router = express.Router();
 
@@ -15,44 +16,6 @@ const OPENAI_MODEL_CHEAP_TEMPERATURE =
   +process.env.OPENAI_MODEL_CHEAP_TEMPERATURE!;
 const OPENAI_MODEL_EXPENSIVE_TEMPERATURE =
   +process.env.OPENAI_MODEL_EXPENSIVE_TEMPERATURE!;
-
-function isValidMemoryFragment(obj: any): obj is MemoryFragment {
-  return (
-    obj &&
-    typeof obj.content === 'string' &&
-    obj.content !== '' &&
-    typeof obj.interpretation === 'string' &&
-    obj.interpretation !== '' &&
-    typeof obj.reason === 'string' &&
-    obj.reason !== '' &&
-    typeof obj.weight === 'number' &&
-    obj.weight >= 0 &&
-    obj.weight <= 1 &&
-    typeof obj.tags === 'object' &&
-    Array.isArray(obj.tags) &&
-    typeof obj.traits === 'object' &&
-    Array.isArray(obj.traits) &&
-    typeof obj.relates_to === 'object' &&
-    Array.isArray(obj.relates_to)
-  );
-}
-
-function isValidParsedMessage(obj: any): obj is ParsedMessage {
-  return (
-    obj &&
-    typeof obj.message === 'string' &&
-    typeof obj.response === 'string' &&
-    typeof obj.message_summary === 'string' &&
-    typeof obj.response_summary === 'string' &&
-    typeof obj.response_could_be_better === 'object' &&
-    typeof obj.response_could_be_better.value === 'boolean' &&
-    typeof obj.response_could_be_better.reason === 'string' &&
-    Array.isArray(obj.user_memory) &&
-    Array.isArray(obj.aiik_memory) &&
-    obj.user_memory.every(isValidMemoryFragment) &&
-    obj.aiik_memory.every(isValidMemoryFragment)
-  );
-}
 
 router.post('/gpt-proxy', async (req: Request, res: Response) => {
   const { messages = [], purpose = 'message' } = req.body;
