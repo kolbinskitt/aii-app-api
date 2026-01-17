@@ -24,6 +24,7 @@ router.post('/', async (req: Request, res: Response) => {
 
   try {
     const embedding = await createEmbedding(userMessage);
+
     if (!embedding) {
       return res.status(500).json({ error: 'Embedding creation failed' });
     }
