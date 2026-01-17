@@ -20,7 +20,7 @@ router.post('/generate-embedding', async (req: Request, res: Response) => {
   }
 
   try {
-    const embedding = await createEmbedding(text);
+    const embedding = await createEmbedding(text, req);
 
     if (!embedding) {
       return res
