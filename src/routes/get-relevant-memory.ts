@@ -10,7 +10,13 @@ const MEMORY_LIMIT = 12;
 const SIMILARITY_THRESHOLD = 0.75;
 
 const getMessage = (msg: any) =>
-  `${msg.content} ${Array.isArray(msg.relates_to) && msg.relates_to.length > 0 ? ` Tematy "relates_to": [${msg.relates_to.map(r => `"${r.value.replace(/"/g, '\\"')}"`).join(', ')}]` : ''}`;
+  `${msg.content} ${
+    Array.isArray(msg.relates_to) && msg.relates_to.length > 0
+      ? `
+Tematy "relates_to": ${msg.relates_to.map(r => `\n - \`${r.value}\``).join(', ')}`
+      : ''
+  }
+`;
 
 router.post('/', async (req: Request, res: Response) => {
   const { userMessage, aiikId, roomId, lastMessagesAmount } = req.body;
