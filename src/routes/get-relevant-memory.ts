@@ -10,7 +10,7 @@ const MEMORY_LIMIT = 12;
 const SIMILARITY_THRESHOLD = 0.75;
 
 router.post('/', async (req: Request, res: Response) => {
-  const { userMessage, aiikId, roomId } = req.body;
+  const { userMessage, aiikId, roomId, lastMessagesAmount } = req.body;
 
   if (!userMessage || typeof userMessage !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid userMessage' });
@@ -60,7 +60,33 @@ router.post('/', async (req: Request, res: Response) => {
         traits: m.traits,
       }));
 
-    return res.status(200).json({ memory });
+    // Fetch last N messages from this room
+    const { data: recentMessages, error: messagesError } = await supabase
+      .from('messages')
+      .select('role, text')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: false })
+      .limit(lastMessagesAmount);
+
+    if (messagesError) {
+      console.error('Failed to fetch recent messages:', messagesError);
+    }
+
+    // Reformat messages to [{ user, aiik }]
+    const messages = (recentMessages ?? []).reduceRight(
+      (acc: any[], msg: any) => {
+        if (msg.role === 'user') {
+          acc.push({ user: msg.text, aiik: '' });
+        } else if (msg.role === 'aiik') {
+          if (acc.length === 0) acc.push({ user: '', aiik: msg.text });
+          else acc[acc.length - 1].aiik = msg.text;
+        }
+        return acc;
+      },
+      [],
+    );
+
+    return res.status(200).json({ memory, messages });
   } catch (err) {
     console.error('get-relevant-memory error:', err);
     return res.status(500).json({ error: 'Unexpected error', details: err });
