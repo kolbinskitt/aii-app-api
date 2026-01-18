@@ -178,6 +178,7 @@ export interface ParsedMessage {
     value: boolean;
     reason: string;
   };
+  not_enought_data: boolean;
 }
 
 export type WeightedValue = {

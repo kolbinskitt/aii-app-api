@@ -40,6 +40,7 @@ export function isValidParsedMessage(obj: any): obj is ParsedMessage {
     typeof obj.response === 'string' &&
     typeof obj.message_summary === 'string' &&
     typeof obj.response_summary === 'string' &&
+    typeof obj.not_enought_data === 'boolean' &&
     typeof obj.response_could_be_better === 'object' &&
     typeof obj.response_could_be_better.value === 'boolean' &&
     typeof obj.response_could_be_better.reason === 'string' &&
