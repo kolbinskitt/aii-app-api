@@ -1,4 +1,19 @@
-import { MemoryFragment, ParsedMessage } from '@/types';
+import { MemoryFragment, ParsedMessage, WeightedValue } from '@/types';
+
+function isWeightedValueArray(arr: any): arr is WeightedValue[] {
+  return (
+    Array.isArray(arr) &&
+    arr.every(
+      item =>
+        item &&
+        typeof item.value === 'string' &&
+        item.value !== '' &&
+        typeof item.weight === 'number' &&
+        item.weight >= 0 &&
+        item.weight <= 1,
+    )
+  );
+}
 
 function isValidMemoryFragment(obj: any): obj is MemoryFragment {
   return (
@@ -12,12 +27,9 @@ function isValidMemoryFragment(obj: any): obj is MemoryFragment {
     typeof obj.weight === 'number' &&
     obj.weight >= 0 &&
     obj.weight <= 1 &&
-    typeof obj.tags === 'object' &&
-    Array.isArray(obj.tags) &&
-    typeof obj.traits === 'object' &&
-    Array.isArray(obj.traits) &&
-    typeof obj.relates_to === 'object' &&
-    Array.isArray(obj.relates_to)
+    isWeightedValueArray(obj.tags) &&
+    isWeightedValueArray(obj.traits) &&
+    isWeightedValueArray(obj.relates_to)
   );
 }
 

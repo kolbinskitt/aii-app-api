@@ -1,5 +1,19 @@
 import { ChatCompletionCreateParams } from 'openai/resources/chat';
 
+const weightedValueSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['value', 'weight'],
+  properties: {
+    value: { type: 'string' },
+    weight: {
+      type: 'number',
+      minimum: 0,
+      maximum: 1,
+    },
+  },
+};
+
 const memoryFragmentSchema = {
   type: 'array',
   items: {
@@ -25,15 +39,15 @@ const memoryFragmentSchema = {
       },
       tags: {
         type: 'array',
-        items: { type: 'string' },
+        items: weightedValueSchema,
       },
       traits: {
         type: 'array',
-        items: { type: 'string' },
+        items: weightedValueSchema,
       },
       relates_to: {
         type: 'array',
-        items: { type: 'string' },
+        items: weightedValueSchema,
       },
     },
   },

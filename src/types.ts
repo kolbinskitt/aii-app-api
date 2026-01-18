@@ -180,12 +180,17 @@ export interface ParsedMessage {
   };
 }
 
+export type WeightedValue = {
+  value: string;
+  weight: number; // 0 to 1
+};
+
 export type MemoryFragment = {
   content: string; // oryginalna treść zapamiętanego fragmentu
   interpretation: string; // opis interpretacyjny (np. „wyraża lęk przed bliskością”)
   reason: string; // dlaczego fragment ma być zapamiętany
   weight: number; // ważność pamięci (liczba z zakresu 0.0 – 1.0)
-  tags?: string[]; // elastyczne słowa-klucze (np. "emotion", "trust", "grief", "hope")
-  traits?: string[]; // cechy: np. "reflective", "vulnerable", "pattern", "relational"
-  relates_to?: string[]; // ID innych memory, z którymi ta jest powiązana (np. echo wcześniejszej sytuacji)
+  tags?: WeightedValue[]; // elastyczne słowa-klucze (np. "emotion", "trust", "grief", "hope") wraz z wagami
+  traits?: WeightedValue[]; // cechy: np. "reflective", "vulnerable", "pattern", "relational" wraz z wagami
+  relates_to?: WeightedValue[]; // ID innych memory, z którymi ta jest powiązana (np. echo wcześniejszej sytuacji) wraz z wagami
 };
