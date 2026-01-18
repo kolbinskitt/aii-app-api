@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { generateUuic } from '../helpers/generateUuic';
+import { ADMIN_EMAIL } from '@/consts';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -11,8 +12,6 @@ type AuthUser = {
   email?: string;
   user_metadata: any;
 };
-
-const ADMIN_EMAIL = 'olbik80@gmail.com';
 
 export async function getOrCreateUser(authUser: AuthUser) {
   const auth_id = authUser.id;

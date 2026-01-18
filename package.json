@@ -1,6 +1,6 @@
 {
   "name": "aii-app-api",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "",
   "main": "index.ts",
   "scripts": {
@@ -39,6 +39,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "openai": "^6.15.0",
+    "resend": "^6.7.0",
     "uuid": "^13.0.0"
   }
 }

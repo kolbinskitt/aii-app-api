@@ -9,6 +9,7 @@ import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
 import getRelevantMemory from '@/routes/get-relevant-memory';
+import sendEmail from '@/routes/send-email';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.post('/generate-embedding', generateEmbedding);
 app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);
 app.use('/get-relevant-memory', getRelevantMemory);
+app.use('/send-email', sendEmail);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API listening on port ${PORT}`);
