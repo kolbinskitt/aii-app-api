@@ -12,7 +12,7 @@ type AuthUser = {
   user_metadata: any;
 };
 
-const ADMIN_ID = 'd35305e6-2d83-4b07-aaba-c6c65b84a8c4';
+const ADMIN_EMAIL = 'olbik80@gmail.com';
 
 export async function getOrCreateUser(authUser: AuthUser) {
   const auth_id = authUser.id;
@@ -51,7 +51,7 @@ export async function getOrCreateUser(authUser: AuthUser) {
     display_name,
     profile_pic_url,
     uuic: generateUuic(),
-    role: auth_id === ADMIN_ID ? 'admin' : 'user',
+    role: email === ADMIN_EMAIL ? 'admin' : 'user',
   };
   const { data: inserted, error: insertError } = await supabase
     .from('users')
