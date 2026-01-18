@@ -9,6 +9,9 @@ const router = express.Router();
 const MEMORY_LIMIT = 12;
 const SIMILARITY_THRESHOLD = 0.75;
 
+const getMessage = (msg: any) =>
+  `${msg.content} ${Array.isArray(msg.relates_to) && msg.relates_to.length > 0 ? ` Tematy "relates_to": [${msg.relates_to.map(r => `"${r.value.replace(/"/g, '\\"')}"`).join(', ')}]` : ''}`;
+
 router.post('/', async (req: Request, res: Response) => {
   const { userMessage, aiikId, roomId, lastMessagesAmount } = req.body;
 
@@ -62,9 +65,10 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Fetch last N messages from this room
     const { data: recentMessages, error: messagesError } = await supabase
-      .from('messages')
-      .select('role, text')
+      .from('fractal_node')
+      .select('*')
       .eq('room_id', roomId)
+      .eq('type', 'message')
       .order('created_at', { ascending: false })
       .limit(lastMessagesAmount);
 
@@ -73,18 +77,20 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Reformat messages to [{ user, aiik }]
-    const messages = (recentMessages ?? []).reduceRight(
-      (acc: any[], msg: any) => {
-        if (msg.role === 'user') {
-          acc.push({ user: msg.text, aiik: '' });
-        } else if (msg.role === 'aiik') {
-          if (acc.length === 0) acc.push({ user: '', aiik: msg.text });
-          else acc[acc.length - 1].aiik = msg.text;
-        }
-        return acc;
-      },
-      [],
-    );
+    const messages: { user: string; aiik: string }[] = (
+      recentMessages ?? []
+    ).reduceRight((acc: any[], msg: any) => {
+      if (msg.aiik_id === null) {
+        acc.push({
+          user: getMessage(msg),
+          aiik: '',
+        });
+      } else if (msg.aiik_id !== null) {
+        if (acc.length === 0) acc.push({ user: '', aiik: getMessage(msg) });
+        else acc[acc.length - 1].aiik = getMessage(msg);
+      }
+      return acc;
+    }, []);
 
     return res.status(200).json({ memory, messages });
   } catch (err) {
