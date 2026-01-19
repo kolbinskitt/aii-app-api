@@ -42,11 +42,23 @@ export function isValidParsedMessage(obj: any): obj is ParsedMessage {
     typeof obj.response_summary === 'string' &&
     typeof obj.not_enought_data === 'boolean' &&
     typeof obj.response_could_be_better === 'object' &&
+    obj.response_could_be_better !== null &&
     typeof obj.response_could_be_better.value === 'boolean' &&
     typeof obj.response_could_be_better.reason === 'string' &&
     Array.isArray(obj.user_memory) &&
     Array.isArray(obj.aiik_memory) &&
     obj.user_memory.every(isValidMemoryFragment) &&
-    obj.aiik_memory.every(isValidMemoryFragment)
+    obj.aiik_memory.every(isValidMemoryFragment) &&
+    typeof obj.internal_reaction === 'object' &&
+    obj.internal_reaction !== null &&
+    typeof obj.internal_reaction.shouldSpeak === 'boolean' &&
+    typeof obj.internal_reaction.confidence === 'number' &&
+    obj.internal_reaction.confidence >= 0 &&
+    obj.internal_reaction.confidence <= 1 &&
+    typeof obj.internal_reaction.intent === 'string' &&
+    ['add', 'clarify', 'challenge', 'ask', 'hold'].includes(
+      obj.internal_reaction.intent,
+    ) &&
+    typeof obj.internal_reaction.reason === 'string'
   );
 }

@@ -78,6 +78,7 @@ export const responseFormat: ChatCompletionCreateParams['response_format'] = {
         'aiik_memory',
         'response_could_be_better',
         'not_enought_data',
+        'internal_reaction',
       ],
       properties: {
         message: {
@@ -92,8 +93,10 @@ export const responseFormat: ChatCompletionCreateParams['response_format'] = {
         response_summary: {
           type: 'string',
         },
+
         user_memory: memoryFragmentSchema,
         aiik_memory: memoryFragmentSchema,
+
         response_could_be_better: {
           type: 'object',
           additionalProperties: false,
@@ -107,8 +110,40 @@ export const responseFormat: ChatCompletionCreateParams['response_format'] = {
             },
           },
         },
+
         not_enought_data: {
           type: 'boolean',
+        },
+
+        internal_reaction: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['shouldSpeak', 'confidence', 'intent', 'reason'],
+          properties: {
+            shouldSpeak: {
+              type: 'boolean',
+              description:
+                'Czy aiik uważa, że jego wypowiedź wnosi istotną wartość do aktualnej rozmowy',
+            },
+            confidence: {
+              type: 'number',
+              minimum: 0,
+              maximum: 1,
+              description:
+                'Jak silna jest potrzeba zabrania głosu w tej chwili (nie pewność faktów)',
+            },
+            intent: {
+              type: 'string',
+              enum: ['add', 'clarify', 'challenge', 'ask', 'hold'],
+              description:
+                'Intencja potencjalnej wypowiedzi (dla Orchestratora, nie dla UI)',
+            },
+            reason: {
+              type: 'string',
+              description:
+                'Krótki powód decyzji (tylko do debugowania, nigdy do UI)',
+            },
+          },
         },
       },
     },

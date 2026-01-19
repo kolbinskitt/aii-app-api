@@ -167,6 +167,20 @@ export type RelatiZON = {
   };
 };
 
+export type InternalReactionIntent =
+  | 'add'
+  | 'clarify'
+  | 'challenge'
+  | 'ask'
+  | 'hold';
+
+export interface InternalReaction {
+  shouldSpeak: boolean;
+  confidence: number; // 0.0 – 1.0
+  intent: InternalReactionIntent;
+  reason: string;
+}
+
 export interface ParsedMessage {
   message: string;
   response: string;
@@ -179,6 +193,7 @@ export interface ParsedMessage {
     reason: string;
   };
   not_enought_data: boolean;
+  internal_reaction: InternalReaction;
 }
 
 export type WeightedValue = {

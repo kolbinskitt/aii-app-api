@@ -8,6 +8,14 @@ import {
   RELEVANT_MEMORY_SIMILARITY_THRESHOLD,
 } from '@/consts';
 
+type UserAiikiMessage = {
+  user: string;
+  aiiki: {
+    name: string;
+    message: string;
+  }[];
+};
+
 const router = express.Router();
 
 const getMessage = (msg: any) =>
@@ -70,6 +78,20 @@ router.post('/', async (req: Request, res: Response) => {
         traits: m.traits,
       }));
 
+    // Fetch aiik names (cache per request)
+    const { data: aiiks, error: aiikError } = await supabase
+      .from('aiiki')
+      .select('id, name');
+
+    if (aiikError) {
+      console.error('Failed to fetch aiik names:', aiikError);
+    }
+
+    const aiikNameMap = new Map<string, string>();
+    (aiiks ?? []).forEach((a: any) => {
+      aiikNameMap.set(a.id, a.name);
+    });
+
     // Fetch last N messages from this room
     const { data: recentMessages, error: messagesError } = await supabase
       .from('fractal_node')
@@ -83,21 +105,38 @@ router.post('/', async (req: Request, res: Response) => {
       console.error('Failed to fetch recent messages:', messagesError);
     }
 
-    // Reformat messages to [{ user, aiik }]
-    const messages: { user: string; aiik: string }[] = (
-      recentMessages ?? []
-    ).reduceRight((acc: any[], msg: any) => {
-      if (msg.aiik_id === null) {
-        acc.push({
-          user: getMessage(msg),
-          aiik: '',
+    const messages: UserAiikiMessage[] = (recentMessages ?? []).reduceRight(
+      (acc: UserAiikiMessage[], msg: any) => {
+        // 🧍 USER MESSAGE → nowa fala
+        if (msg.aiik_id === null) {
+          acc.push({
+            user: getMessage(msg),
+            aiiki: [],
+          });
+          return acc;
+        }
+
+        // 🤖 AIK MESSAGE → doklejamy do ostatniej fali
+        const aiikName =
+          aiikNameMap.get(msg.aiik_id) ?? `Aiik(${msg.aiik_id.slice(0, 4)})`;
+
+        // jeśli z jakiegoś powodu nie ma jeszcze usera (edge-case)
+        if (acc.length === 0) {
+          acc.push({
+            user: '',
+            aiiki: [],
+          });
+        }
+
+        acc[acc.length - 1].aiiki.push({
+          name: aiikName,
+          message: getMessage(msg),
         });
-      } else if (msg.aiik_id !== null) {
-        if (acc.length === 0) acc.push({ user: '', aiik: getMessage(msg) });
-        else acc[acc.length - 1].aiik = getMessage(msg);
-      }
-      return acc;
-    }, []);
+
+        return acc;
+      },
+      [],
+    );
 
     return res.status(200).json({ memory, messages });
   } catch (err) {
