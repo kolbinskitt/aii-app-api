@@ -3,11 +3,12 @@ import type { Request, Response } from 'express';
 import { supabase } from '@/lib/supabase';
 import { createEmbedding } from '@/lib/openai';
 import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
+import {
+  RELEVANT_MEMORY_LIMIT,
+  RELEVANT_MEMORY_SIMILARITY_THRESHOLD,
+} from '@/consts';
 
 const router = express.Router();
-
-const MEMORY_LIMIT = 12;
-const SIMILARITY_THRESHOLD = 0.75;
 
 const getMessage = (msg: any) =>
   `${msg.content} ${
@@ -42,8 +43,8 @@ router.post('/', async (req: Request, res: Response) => {
       'match_fractal_memory',
       {
         query_embedding: embedding,
-        match_threshold: SIMILARITY_THRESHOLD,
-        match_count: MEMORY_LIMIT,
+        match_threshold: RELEVANT_MEMORY_SIMILARITY_THRESHOLD,
+        match_count: RELEVANT_MEMORY_LIMIT,
         user_id: userId,
         aiik_id: aiikId ?? null,
         room_id: roomId ?? null,
