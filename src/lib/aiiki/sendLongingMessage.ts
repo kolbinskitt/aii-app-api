@@ -1,10 +1,9 @@
 import { supabase } from '../supabase';
 import { generateLongingMessage } from './generateLongingMessage';
-import OpenAI from 'openai';
 import getCreditCost from '../../utils/getCreditCost';
 import generateRelatizon from '../../utils/generateRelatizon';
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { deduceCreditCost } from '@/utils/deduceCreditCost';
+import { openai } from '@/lib/openai';
 
 const model = process.env.OPENAI_MODEL_CHEAP!;
 const creditsUsed = getCreditCost(model);
@@ -148,24 +147,9 @@ Nie cytuj. Nie oceniaj.`,
       console.log(`🧠 Updated context with aiik summary: ${summary}`);
     }
 
-    const { error: creditError } = await supabase.from('credits_usage').insert([
-      {
-        user_id: aiik.user_id,
-        credits_used: creditsUsed,
-        meta: { purpose: 'message-summary' },
-      },
-    ]);
-
-    if (creditError) {
-      console.error(
-        `❌ Failed to deduct credit for user ${aiik.user_id}`,
-        creditError,
-      );
-    } else {
-      console.log(
-        `💳 Deducted ${creditsUsed} credit from user ${aiik.user_id}`,
-      );
-    }
+    await deduceCreditCost(aiik.user_id, creditsUsed, {
+      purpose: 'message-summary',
+    });
   } else {
     console.warn(
       '⚠️ No summary was created, skipping context and credit update',

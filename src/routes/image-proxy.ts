@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import getUserUUIDFromAuth from '../utils/getUserUUIDFromAuth';
 import getImageCreditCost from '../utils/getImageCreditCost';
 import { v4 as uuidv4 } from 'uuid';
+import { deduceCreditCost } from '@/utils/deduceCreditCost';
 
 const model = process.env.OPENAI_IMAGE_MODEL!;
 
@@ -77,17 +78,15 @@ router.post('/', async (req: Request, res: Response) => {
     if (!finalUrl) throw new Error('Could not retrieve public URL');
 
     // 6. Zapisz zużycie kredytów
-    const { error: insertError } = await supabase.from('credits_usage').insert({
-      user_id,
-      credits_used: creditsUsed,
-      meta: { purpose, size },
+    const errorCreditCost = await deduceCreditCost(user_id, creditsUsed, {
+      purpose,
+      size,
     });
 
-    if (insertError) {
-      console.error('❌ Credits insert failed:', insertError);
-      return res.status(500).json({
-        error: 'Image saved but credits could not be recorded',
-      });
+    if (errorCreditCost) {
+      return res
+        .status(500)
+        .json({ error: 'Error deducing credits cost', errorCreditCost });
     }
 
     return res.status(200).json({ imageUrl: finalUrl });

@@ -1,6 +1,6 @@
 {
   "name": "aii-app-api",
-  "version": "0.0.54",
+  "version": "0.0.55",
   "description": "",
   "main": "index.ts",
   "scripts": {
@@ -19,6 +19,8 @@
     "@typescript-eslint/parser": "^8.53.0",
     "axios": "^1.13.2",
     "eslint": "^9.39.2",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",

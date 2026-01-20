@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import { supabase } from '@/lib/supabase';
-import { createEmbedding } from '@/lib/openai';
+import { createEmbedding } from '@/utils/createEmbedding';
 import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
 import {
   RELEVANT_MEMORY_LIMIT,

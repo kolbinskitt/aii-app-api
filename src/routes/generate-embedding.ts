@@ -1,14 +1,14 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import { createEmbedding } from '@/lib/openai';
+import { createEmbedding } from '@/utils/createEmbedding';
 import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
 
 const router = express.Router();
 
 router.post('/generate-embedding', async (req: Request, res: Response) => {
   const { text } = req.body;
-
   const user_id = await getUserUUIDFromAuth(req);
+
   if (!user_id) {
     return res.status(401).json({ error: 'Brak autoryzacji lub usera' });
   }

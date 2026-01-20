@@ -1,12 +1,12 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import { supabase } from '@/lib/supabase';
 import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
 import getCreditCost from '@/utils/getCreditCost';
 import { openai } from '@/lib/openai';
 import { ParsedMessage } from '@/types';
 import { responseFormat } from '@/helpers/gptSchema';
 import { isValidParsedMessage } from '@/helpers/gptProxy';
+import { deduceCreditCost } from '@/utils/deduceCreditCost';
 
 const router = express.Router();
 
@@ -78,11 +78,21 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
           });
         }
 
-        await supabase.from('credits_usage').insert({
+        const errorDeduceCreditCost = await deduceCreditCost(
           user_id,
-          credits_used: totalCreditsUsed,
-          meta: { purpose, models_used: usedModels },
-        });
+          totalCreditsUsed,
+          {
+            purpose,
+            models_used: usedModels,
+          },
+        );
+
+        if (errorDeduceCreditCost) {
+          return res.status(500).json({
+            error: 'Error deduce credits cost',
+            errorDeduceCreditCost,
+          });
+        }
 
         return res.status(200).json({
           content: {
@@ -98,11 +108,21 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
       }
     }
 
-    await supabase.from('credits_usage').insert({
+    const errorDeduceCreditCost = await deduceCreditCost(
       user_id,
-      credits_used: totalCreditsUsed,
-      meta: { purpose, models_used: usedModels },
-    });
+      totalCreditsUsed,
+      {
+        purpose,
+        models_used: usedModels,
+      },
+    );
+
+    if (errorDeduceCreditCost) {
+      return res.status(500).json({
+        error: 'Error deduce credits cost',
+        errorDeduceCreditCost,
+      });
+    }
 
     return res.status(200).json({
       content: {
