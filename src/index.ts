@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
-import gptProxy from './routes/gpt-proxy';
+import llmMessageResponse from './routes/llm-message-response';
 import generateEmbedding from './routes/generate-embedding';
 import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
@@ -30,7 +30,7 @@ app.use(
 );
 
 app.use('/auth', authRoutes);
-app.post('/gpt-proxy', gptProxy);
+app.post('/llm-message-response', llmMessageResponse);
 app.post('/generate-embedding', generateEmbedding);
 app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);

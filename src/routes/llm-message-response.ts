@@ -4,8 +4,8 @@ import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
 import getCreditCost from '@/utils/getCreditCost';
 import { openai } from '@/lib/openai';
 import { ParsedMessage } from '@/types';
-import { responseFormat } from '@/helpers/gptSchema';
-import { isValidParsedMessage } from '@/helpers/gptProxy';
+import { llmMessageResponseFormat } from '@/helpers/llmMessageResponseSchema';
+import { isValidParsedMessage } from '@/helpers/llmMessageResponseChecks';
 import { deduceCreditCost } from '@/utils/deduceCreditCost';
 
 const router = express.Router();
@@ -17,7 +17,7 @@ const OPENAI_MODEL_CHEAP_TEMPERATURE =
 const OPENAI_MODEL_EXPENSIVE_TEMPERATURE =
   +process.env.OPENAI_MODEL_EXPENSIVE_TEMPERATURE!;
 
-router.post('/gpt-proxy', async (req: Request, res: Response) => {
+router.post('/llm-message-response', async (req: Request, res: Response) => {
   const { messages = [], purpose = 'message' } = req.body;
   const user_id = await getUserUUIDFromAuth(req);
 
@@ -61,7 +61,7 @@ router.post('/gpt-proxy', async (req: Request, res: Response) => {
         model: EXPENSIVE_MODEL,
         temperature: OPENAI_MODEL_EXPENSIVE_TEMPERATURE,
         messages,
-        response_format: responseFormat,
+        response_format: llmMessageResponseFormat,
       });
 
       usedModels.push(EXPENSIVE_MODEL);
