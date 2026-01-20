@@ -4,6 +4,7 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
 import llmMessageResponse from './routes/llm-message-response';
+import llmResponsesRedundancyCheck from './routes/llm-responses-redundancy-check';
 import generateEmbedding from './routes/generate-embedding';
 import imageProxy from './routes/image-proxy';
 import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
@@ -31,6 +32,7 @@ app.use(
 
 app.use('/auth', authRoutes);
 app.post('/llm-message-response', llmMessageResponse);
+app.post('/llm-responses-redundancy-check', llmResponsesRedundancyCheck);
 app.post('/generate-embedding', generateEmbedding);
 app.use('/image-proxy', imageProxy);
 app.post('/generate-relatizon', generateRelatizon);

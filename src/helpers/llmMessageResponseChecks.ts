@@ -1,4 +1,8 @@
-import { MemoryFragment, ParsedMessage, WeightedValue } from '@/types';
+import {
+  MemoryFragment,
+  LLMMessageResponseParsedMessage,
+  WeightedValue,
+} from '@/types';
 
 function isWeightedValueArray(arr: any): arr is WeightedValue[] {
   return (
@@ -33,7 +37,9 @@ function isValidMemoryFragment(obj: any): obj is MemoryFragment {
   );
 }
 
-export function isValidParsedMessage(obj: any): obj is ParsedMessage {
+export function isValidLLmMessageResponseParsedMessage(
+  obj: any,
+): obj is LLMMessageResponseParsedMessage {
   return (
     obj &&
     typeof obj.message === 'string' &&

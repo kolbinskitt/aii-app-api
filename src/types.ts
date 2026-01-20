@@ -181,21 +181,6 @@ export interface InternalReaction {
   reason: string;
 }
 
-export interface ParsedMessage {
-  message: string;
-  response: string;
-  message_summary: string;
-  response_summary: string;
-  user_memory: MemoryFragment[];
-  aiik_memory: MemoryFragment[];
-  response_could_be_better: {
-    value: boolean;
-    reason: string;
-  };
-  not_enought_data: boolean;
-  internal_reaction: InternalReaction;
-}
-
 export type WeightedValue = {
   value: string;
   weight: number; // 0 to 1
@@ -210,3 +195,31 @@ export type MemoryFragment = {
   traits?: WeightedValue[]; // cechy: np. "reflective", "vulnerable", "pattern", "relational" wraz z wagami
   relates_to?: WeightedValue[]; // ID innych memory, z którymi ta jest powiązana (np. echo wcześniejszej sytuacji) wraz z wagami
 };
+
+export interface LLMMessageResponseParsedMessage {
+  message: string;
+  response: string;
+  message_summary: string;
+  response_summary: string;
+  user_memory: MemoryFragment[];
+  aiik_memory: MemoryFragment[];
+  response_could_be_better: {
+    value: boolean;
+    reason: string;
+  };
+  not_enought_data: boolean;
+  internal_reaction: InternalReaction;
+}
+
+export interface LLMResponsesRedundancyCheckParsedMessage {
+  keep: string[]; // aiik_id[]
+  drop: string[]; // aiik_id[]
+  reasoning: {
+    aiik_id: string;
+    reason: string;
+  }[];
+  response_could_be_better: {
+    value: boolean;
+    reason: string;
+  };
+}

@@ -3,9 +3,9 @@ import type { Request, Response } from 'express';
 import getUserUUIDFromAuth from '@/utils/getUserUUIDFromAuth';
 import getCreditCost from '@/utils/getCreditCost';
 import { openai } from '@/lib/openai';
-import { ParsedMessage } from '@/types';
+import { LLMMessageResponseParsedMessage } from '@/types';
 import { llmMessageResponseFormat } from '@/helpers/llmMessageResponseSchema';
-import { isValidParsedMessage } from '@/helpers/llmMessageResponseChecks';
+import { isValidLLmMessageResponseParsedMessage } from '@/helpers/llmMessageResponseChecks';
 import { deduceCreditCost } from '@/utils/deduceCreditCost';
 
 const router = express.Router();
@@ -43,11 +43,11 @@ router.post('/llm-message-response', async (req: Request, res: Response) => {
     usedModels.push(CHEAP_MODEL);
     totalCreditsUsed += getCreditCost(CHEAP_MODEL);
     const rawContent = completionCheap.choices[0]?.message?.content ?? '';
-    let parsed: ParsedMessage | null = null;
+    let parsed: LLMMessageResponseParsedMessage | null = null;
 
     try {
       const candidate = JSON.parse(rawContent);
-      if (isValidParsedMessage(candidate)) {
+      if (isValidLLmMessageResponseParsedMessage(candidate)) {
         parsed = candidate;
       }
     } catch (_err) {
@@ -68,11 +68,11 @@ router.post('/llm-message-response', async (req: Request, res: Response) => {
       totalCreditsUsed += getCreditCost(EXPENSIVE_MODEL);
 
       try {
-        const expensiveParsed: ParsedMessage = JSON.parse(
+        const expensiveParsed: LLMMessageResponseParsedMessage = JSON.parse(
           completionExpensive.choices[0]?.message?.content ?? '',
         );
 
-        if (!isValidParsedMessage(expensiveParsed)) {
+        if (!isValidLLmMessageResponseParsedMessage(expensiveParsed)) {
           return res.status(500).json({
             error: 'Niepoprawny JSON z OpenAI (expensive model)',
           });
@@ -131,8 +131,8 @@ router.post('/llm-message-response', async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error('🔥 GPT Proxy Error:', err);
-    return res.status(500).json({ error: 'GPT proxy call failed', err });
+    console.error('🔥 LLM message response error:', err);
+    return res.status(500).json({ error: 'LLM message response error', err });
   }
 });
 
