@@ -7,7 +7,6 @@ import llmMessageResponse from './routes/llm-message-response';
 import llmResponsesRedundancyCheck from './routes/llm-responses-redundancy-check';
 import generateEmbedding from './routes/generate-embedding';
 import imageProxy from './routes/image-proxy';
-import { startAiikLongingLoop } from './lib/aiiki/aiikLongingLoop';
 import generateRelatizon from './routes/generate-relatizon';
 import getRelevantMemory from '@/routes/get-relevant-memory';
 import sendEmail from '@/routes/send-email';
@@ -46,5 +45,3 @@ app.listen(PORT, '0.0.0.0', () => {
 app.get('/', (req: Request, res: Response) => {
   res.send('✨ aiiK API is alive ✨');
 });
-
-startAiikLongingLoop();
