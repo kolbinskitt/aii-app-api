@@ -223,3 +223,13 @@ export interface LLMResponsesRedundancyCheckParsedMessage {
     reason: string;
   };
 }
+
+export type UserAiikiMessage = {
+  user: string;
+  aiiki: {
+    id: string;
+    name: string;
+    message: string;
+    said: boolean;
+  }[];
+};

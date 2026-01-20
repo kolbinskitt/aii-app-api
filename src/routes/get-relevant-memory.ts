@@ -7,14 +7,7 @@ import {
   RELEVANT_MEMORY_LIMIT,
   RELEVANT_MEMORY_SIMILARITY_THRESHOLD,
 } from '@/consts';
-
-type UserAiikiMessage = {
-  user: string;
-  aiiki: {
-    name: string;
-    message: string;
-  }[];
-};
+import { UserAiikiMessage } from '@/types';
 
 const router = express.Router();
 
@@ -129,8 +122,10 @@ router.post('/', async (req: Request, res: Response) => {
         }
 
         acc[acc.length - 1].aiiki.push({
+          id: msg.aiik_id,
           name: aiikName,
           message: getMessage(msg),
+          said: msg.said,
         });
 
         return acc;
