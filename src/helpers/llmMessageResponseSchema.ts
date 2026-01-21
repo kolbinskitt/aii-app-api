@@ -31,15 +31,9 @@ const memoryFragmentSchema = {
       'relates_to',
     ],
     properties: {
-      content: {
-        type: 'string',
-      },
-      interpretation: {
-        type: 'string',
-      },
-      reason: {
-        type: 'string',
-      },
+      content: { type: 'string' },
+      interpretation: { type: 'string' },
+      reason: { type: 'string' },
       weight: {
         type: 'number',
         minimum: 0,
@@ -80,20 +74,13 @@ export const llmMessageResponseFormat: ChatCompletionCreateParams['response_form
           'response_could_be_better',
           'not_enought_data',
           'internal_reaction',
+          'eager_to_follow_up',
         ],
         properties: {
-          message: {
-            type: 'string',
-          },
-          response: {
-            type: 'string',
-          },
-          message_summary: {
-            type: 'string',
-          },
-          response_summary: {
-            type: 'string',
-          },
+          message: { type: 'string' },
+          response: { type: 'string' },
+          message_summary: { type: 'string' },
+          response_summary: { type: 'string' },
 
           user_memory: memoryFragmentSchema,
           aiik_memory: memoryFragmentSchema,
@@ -103,12 +90,8 @@ export const llmMessageResponseFormat: ChatCompletionCreateParams['response_form
             additionalProperties: false,
             required: ['value', 'reason'],
             properties: {
-              value: {
-                type: 'boolean',
-              },
-              reason: {
-                type: 'string',
-              },
+              value: { type: 'boolean' },
+              reason: { type: 'string' },
             },
           },
 
@@ -143,6 +126,37 @@ export const llmMessageResponseFormat: ChatCompletionCreateParams['response_form
                 type: 'string',
                 description:
                   'Krótki powód decyzji (tylko do debugowania, nigdy do UI)',
+              },
+            },
+          },
+
+          eager_to_follow_up: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['value', 'reason', 'intensity', 'relates_to'],
+            properties: {
+              value: {
+                type: 'boolean',
+                description:
+                  'Czy aiik chce samodzielnie kontynuować rozmowę, jeśli użytkownik na to pozwoli',
+              },
+              reason: {
+                type: 'string',
+                description:
+                  'Dlaczego aiik chce (lub nie chce) kontynuować rozmowę',
+              },
+              intensity: {
+                type: 'number',
+                minimum: 0,
+                maximum: 1,
+                description:
+                  'Jak silna jest potrzeba kontynuacji (0.0 – brak, 1.0 – bardzo silna)',
+              },
+              relates_to: {
+                type: 'array',
+                items: weightedValueSchema,
+                description:
+                  'Opcjonalne tematy, których dotyczy chęć kontynuacji (np. trust, meaning, identity)',
               },
             },
           },
