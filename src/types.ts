@@ -231,5 +231,6 @@ export type UserAiikiMessage = {
     name: string;
     message: string;
     said: boolean;
+    said_reason: boolean;
   }[];
 };

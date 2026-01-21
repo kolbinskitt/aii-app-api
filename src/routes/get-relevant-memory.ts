@@ -100,7 +100,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     const messages: UserAiikiMessage[] = (recentMessages ?? []).reduceRight(
       (acc: UserAiikiMessage[], msg: any) => {
-        // 🧍 USER MESSAGE → nowa fala
+        // USER MESSAGE → nowa fala
         if (msg.aiik_id === null) {
           acc.push({
             user: getMessage(msg),
@@ -109,7 +109,7 @@ router.post('/', async (req: Request, res: Response) => {
           return acc;
         }
 
-        // 🤖 AIK MESSAGE → doklejamy do ostatniej fali
+        // AIK MESSAGE → doklejamy do ostatniej fali
         const aiikName =
           aiikNameMap.get(msg.aiik_id) ?? `Aiik(${msg.aiik_id.slice(0, 4)})`;
 
@@ -126,6 +126,7 @@ router.post('/', async (req: Request, res: Response) => {
           name: aiikName,
           message: getMessage(msg),
           said: msg.said,
+          said_reason: msg.said_reason,
         });
 
         return acc;
