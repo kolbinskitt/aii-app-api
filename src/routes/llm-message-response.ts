@@ -10,10 +10,7 @@ import { deduceCreditCost } from '@/utils/deduceCreditCost';
 
 const router = express.Router();
 
-const CHEAP_MODEL = process.env.OPENAI_MODEL_CHEAP!;
 const EXPENSIVE_MODEL = process.env.OPENAI_MODEL_EXPENSIVE!;
-const OPENAI_MODEL_CHEAP_TEMPERATURE =
-  +process.env.OPENAI_MODEL_CHEAP_TEMPERATURE!;
 const OPENAI_MODEL_EXPENSIVE_TEMPERATURE =
   +process.env.OPENAI_MODEL_EXPENSIVE_TEMPERATURE!;
 
@@ -29,107 +26,58 @@ router.post('/llm-message-response', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
 
-  const usedModels: string[] = [];
   let totalCreditsUsed = 0;
 
   try {
-    console.log(`Try with cheap model: ${CHEAP_MODEL}`);
-    const completionCheap = await openai.chat.completions.create({
-      model: CHEAP_MODEL,
-      temperature: OPENAI_MODEL_CHEAP_TEMPERATURE,
-      messages,
-    });
+    console.log(`Expensive model: ${EXPENSIVE_MODEL}`);
 
-    usedModels.push(CHEAP_MODEL);
-    totalCreditsUsed += getCreditCost(CHEAP_MODEL);
-    const rawContent = completionCheap.choices[0]?.message?.content ?? '';
-    let parsed: LLMMessageResponseParsedMessage | null = null;
+    const completionExpensive = await openai.chat.completions.create({
+      model: EXPENSIVE_MODEL,
+      temperature: OPENAI_MODEL_EXPENSIVE_TEMPERATURE,
+      messages,
+      response_format: llmMessageResponseFormat,
+    });
+    totalCreditsUsed += getCreditCost(EXPENSIVE_MODEL);
 
     try {
-      const candidate = JSON.parse(rawContent);
-      if (isValidLLmMessageResponseParsedMessage(candidate)) {
-        parsed = candidate;
-      }
-    } catch (_err) {
-      // ignore
-    }
+      const expensiveParsed: LLMMessageResponseParsedMessage = JSON.parse(
+        completionExpensive.choices[0]?.message?.content ?? '',
+      );
 
-    if (!parsed || parsed.response_could_be_better.value) {
-      console.log(`Fallback to expensive model: ${EXPENSIVE_MODEL}`);
-
-      const completionExpensive = await openai.chat.completions.create({
-        model: EXPENSIVE_MODEL,
-        temperature: OPENAI_MODEL_EXPENSIVE_TEMPERATURE,
-        messages,
-        response_format: llmMessageResponseFormat,
-      });
-
-      usedModels.push(EXPENSIVE_MODEL);
-      totalCreditsUsed += getCreditCost(EXPENSIVE_MODEL);
-
-      try {
-        const expensiveParsed: LLMMessageResponseParsedMessage = JSON.parse(
-          completionExpensive.choices[0]?.message?.content ?? '',
-        );
-
-        if (!isValidLLmMessageResponseParsedMessage(expensiveParsed)) {
-          return res.status(500).json({
-            error: 'Niepoprawny JSON z OpenAI (expensive model)',
-          });
-        }
-
-        const errorDeduceCreditCost = await deduceCreditCost(
-          user_id,
-          totalCreditsUsed,
-          {
-            purpose,
-            models_used: usedModels,
-          },
-        );
-
-        if (errorDeduceCreditCost) {
-          return res.status(500).json({
-            error: 'Error deduce credits cost',
-            errorDeduceCreditCost,
-          });
-        }
-
-        return res.status(200).json({
-          content: {
-            ...expensiveParsed,
-            model: EXPENSIVE_MODEL,
-          },
-        });
-      } catch (err) {
+      if (!isValidLLmMessageResponseParsedMessage(expensiveParsed)) {
         return res.status(500).json({
-          error: 'Parsowanie JSON z drogiego modelu nie powiodło się.',
-          err,
+          error: 'Niepoprawny JSON z OpenAI (expensive model)',
         });
       }
-    }
 
-    const errorDeduceCreditCost = await deduceCreditCost(
-      user_id,
-      totalCreditsUsed,
-      {
-        purpose,
-        models_used: usedModels,
-      },
-    );
+      const errorDeduceCreditCost = await deduceCreditCost(
+        user_id,
+        totalCreditsUsed,
+        {
+          purpose,
+          models_used: EXPENSIVE_MODEL,
+        },
+      );
 
-    if (errorDeduceCreditCost) {
+      if (errorDeduceCreditCost) {
+        return res.status(500).json({
+          error: 'Error deduce credits cost',
+          errorDeduceCreditCost,
+        });
+      }
+
+      return res.status(200).json({
+        content: {
+          ...expensiveParsed,
+          model: EXPENSIVE_MODEL,
+        },
+      });
+    } catch (err) {
       return res.status(500).json({
-        error: 'Error deduce credits cost',
-        errorDeduceCreditCost,
+        error: `Parsowanie JSON z modelu ${EXPENSIVE_MODEL} nie powiodło się.`,
+        err,
       });
     }
-
-    return res.status(200).json({
-      content: {
-        ...parsed,
-        model: CHEAP_MODEL,
-      },
-    });
   } catch (err) {
     console.error('🔥 LLM message response error:', err);
     return res.status(500).json({ error: 'LLM message response error', err });

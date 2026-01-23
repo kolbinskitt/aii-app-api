@@ -71,7 +71,6 @@ export const llmMessageResponseFormat: ChatCompletionCreateParams['response_form
           'response_summary',
           'user_memory',
           'aiik_memory',
-          'response_could_be_better',
           'not_enought_data',
           'internal_reaction',
           'eager_to_follow_up',
@@ -84,16 +83,6 @@ export const llmMessageResponseFormat: ChatCompletionCreateParams['response_form
 
           user_memory: memoryFragmentSchema,
           aiik_memory: memoryFragmentSchema,
-
-          response_could_be_better: {
-            type: 'object',
-            additionalProperties: false,
-            required: ['value', 'reason'],
-            properties: {
-              value: { type: 'boolean' },
-              reason: { type: 'string' },
-            },
-          },
 
           not_enought_data: {
             type: 'boolean',

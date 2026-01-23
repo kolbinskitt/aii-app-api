@@ -60,11 +60,6 @@ export function isValidLLmMessageResponseParsedMessage(
     typeof obj.message_summary === 'string' &&
     typeof obj.response_summary === 'string' &&
     typeof obj.not_enought_data === 'boolean' &&
-    // response_could_be_better
-    typeof obj.response_could_be_better === 'object' &&
-    obj.response_could_be_better !== null &&
-    typeof obj.response_could_be_better.value === 'boolean' &&
-    typeof obj.response_could_be_better.reason === 'string' &&
     // memory
     Array.isArray(obj.user_memory) &&
     Array.isArray(obj.aiik_memory) &&
