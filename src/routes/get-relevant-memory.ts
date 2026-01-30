@@ -98,12 +98,30 @@ router.post('/', async (req: Request, res: Response) => {
       console.error('Failed to fetch recent messages:', messagesError);
     }
 
+    // Fetch user display names
+    const { data: userNames, error: userNamesError } = await supabase
+      .from('public_users')
+      .select('id, display_name');
+
+    if (userNamesError) {
+      console.error('Failed to fetch user names:', userNamesError);
+    }
+
+    const userNameMap = new Map<string, string>();
+    (userNames ?? []).forEach((a: any) => {
+      userNameMap.set(a.id, a.display_name);
+    });
+
     const messages: UserAiikiMessage[] = (recentMessages ?? []).reduceRight(
       (acc: UserAiikiMessage[], msg: any) => {
         // USER MESSAGE → nowa fala
         if (msg.aiik_id === null) {
           acc.push({
-            user: getMessage(msg),
+            user: {
+              id: msg.user_id,
+              name: userNameMap.get(msg.user_id) ?? '',
+              message: getMessage(msg),
+            },
             aiiki: [],
           });
           return acc;
@@ -116,7 +134,11 @@ router.post('/', async (req: Request, res: Response) => {
         // jeśli z jakiegoś powodu nie ma jeszcze usera (edge-case)
         if (acc.length === 0) {
           acc.push({
-            user: '',
+            user: {
+              id: '',
+              name: '',
+              message: '',
+            },
             aiiki: [],
           });
         }
